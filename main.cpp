@@ -487,9 +487,26 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
         if (envelopeState != ENVELOPESTATE_OFF 
             && envelopeState != ENVELOPESTATE_RELEASE)
         {
-            // TODO: switch to release state 
+            // switch to release state 
             envelopeState = ENVELOPESTATE_RELEASE;
-            timeSpentInCurrentStateInSamples = 0;
+            targetValueInCurrentState = 0;
+            
+            int releaseTimeInSamples = envelopeParameters.releaseTimeInSamples;
+            if (releaseTimeInSamples > 0)
+            {
+                double normalizedDelta = 
+                    static_cast<double>(- envelopeParameters
+                                          .applyShapePowerFunction (lastComputedSample, 
+                                                                    true));                
+                normalizedValueSlopeInCurrentState = 
+                    static_cast<float> (normalizedDelta / releaseTimeInSamples);
+            }
+            else
+            {
+                // slope is irrelevant in this case since we'll skip forward to OFF mode
+                lastComputedSample = 0;
+                normalizedValueSlopeInCurrentState = 0;
+            }
         }
         return false;
     }
@@ -502,16 +519,35 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
         return false;
     }
 
+    // { envelopeState == ENVELOPESTATE_OFF || allowRetrigger }
 
-    // TODO: switch to attack state
-    if (attackTimeInSamples == 0) {
-        
-    }
-    envelopeState = ENVELOPESTATE_ATTACK;
-    timeSpentInCurrentStateInSamples = 0;
-    normalizedTargetValueInCurrentState = 1.0f;
-
+    bool retriggerHappened = envelopeState != ENVELOPESTATE_OFF;
     
+    if (! retriggerHappened) {
+        lastComputedSample = 0;
+        // otherwise well keep the last value as a starting point for attack
+    }
+
+    // switch to ATTACK state
+    envelopeState = ENVELOPESTATE_ATTACK;
+    targetValueInCurrentState = 1;
+    int attackTimeInSamples = envelopeParameters.attackTimeInSamples;
+
+    if (attackTimeInSamples > 0)
+    {
+        double normalizedDelta = 
+            static_cast<double>(1 - envelopeParameters
+                                    .applyShapePowerFunction (lastComputedSample, 
+                                                              true));
+        normalizedValueSlopeInCurrentState = 
+            static_cast<float> (normalizedDelta / attackTimeInSamples);
+    }
+    else
+    {
+        // slope is irrelevant in this case since we'll skip forward to DECAY mode
+        lastComputedSample = 1;
+        normalizedValueSlopeInCurrentState = 0;
+    }
     return retriggerHappened;
 }
 
