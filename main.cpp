@@ -325,28 +325,28 @@ struct EnvelopeGate
     // UDT2: Nested UDT: Envelope Parameters
     struct EnvelopeParameters
     {
-        EnvelopeParameters();
+        EnvelopeParameters(float sustainLevel = 1);
         ~EnvelopeParameters();
 
         // 5 properties:
         //     1) attack time in samples (int)
-        int attackTimeInSamples;
+        int attackTimeInSamples {0};
         //     2) decay time in samples (int)
-        int decayTimeInSamples;
+        int decayTimeInSamples {0};
         //     3) normalized sustain level (float)
         float normalizedSustainLevel;
         //     4) release time in samples (int)
-        int releaseTimeInSamples;
+        int releaseTimeInSamples {0};
         //     5) exponent for shape power function
-        float exponentOfShapePowerFunction = 1; // default corresponds to linear shape
-
+        //        default corresponds to linear shape:
+        float exponentOfShapePowerFunction {1}; 
         // 3 things it can do:
         //     1) transform value by applying shape power function (or inverse)
-        float transformValueByApplyingShapePowerFunction (float value, bool computeInverseFunction = false);
+        float applyShapePowerFunction (float value, bool computeInverseFunction = false);
 
         //     2) adjust parameters. midValuePoint is the normalized value in (0,1) where the shape transform should reach 0.5 
-        void adjustParameters (float attackTimeInSeconds, float decayTimeInSeconds, float sustainLevel, 
-                               float releaseTimeInSeconds, float midValuePoint = 0.5f, float sampleRateInHz = 44100);
+        void adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, float sustainLevel, 
+                               double releaseTimeInSeconds, double midValuePoint = 0.5, double sampleRateInHz = 44100);
 
         //     3) something that requires a loop => dump shape
         void dumpShape (int numberOfSteps = 11);
@@ -378,9 +378,12 @@ struct EnvelopeGate
     void dumpEnvelopeGateResponse (int numSamplesKeyPressed, int displayEveryNthStep = 1, int maxStepsAllowed = 1000000);
 };
 
+
+///////////////////////////////////////////////////////
 // Implementation of nested UDT: EnvelopeParameters:
 
-EnvelopeGate::EnvelopeParameters::EnvelopeParameters()
+EnvelopeGate::EnvelopeParameters::EnvelopeParameters(float sustainLevel)
+    : normalizedSustainLevel (applyShapePowerFunction (sustainLevel, true))
 {
     std::cout << "constructor EnvelopeParameters" << std::endl;
 }
@@ -392,7 +395,7 @@ EnvelopeGate::EnvelopeParameters::~EnvelopeParameters()
 
 // 1) transform value by applying shape power function (or inverse function depending on flag)
 float EnvelopeGate::EnvelopeParameters
-    ::transformValueByApplyingShapePowerFunction (float value, bool computeInverseFunction)
+    ::applyShapePowerFunction (float value, bool computeInverseFunction)
 {
     if (computeInverseFunction)
     {
@@ -407,9 +410,9 @@ float EnvelopeGate::EnvelopeParameters
 // midValuePoint is the normalized value in (0,1) where the shape transform should reach 0.5 
 
 void EnvelopeGate::EnvelopeParameters
-    ::adjustParameters (float attackTimeInSeconds, float decayTimeInSeconds, 
-                        float sustainLevel, float releaseTimeInSeconds, 
-                        float midValuePoint, float sampleRateInHz)
+    ::adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, 
+                        float sustainLevel, double releaseTimeInSeconds, 
+                        double midValuePoint, double sampleRateInHz)
 {
     attackTimeInSamples = static_cast<int>(attackTimeInSeconds * sampleRateInHz + 0.5);
     decayTimeInSamples = static_cast<int>(decayTimeInSeconds * sampleRateInHz + 0.5);
@@ -421,11 +424,11 @@ void EnvelopeGate::EnvelopeParameters
                      "must be in between 0 and 1 (exclusive) "
                      "=> using default [0.5]" << std::endl;
         
-        midValuePoint = 0.5f;               
+        midValuePoint = 0.5;               
     }
     exponentOfShapePowerFunction = static_cast<float>(log (0.5) / log (midValuePoint));
 
-    normalizedSustainLevel = transformValueByApplyingShapePowerFunction (sustainLevel, true);
+    normalizedSustainLevel = applyShapePowerFunction (sustainLevel, true);
 }
 
 // 3) something that requires a loop => dump shape
@@ -444,7 +447,7 @@ void EnvelopeGate::EnvelopeParameters
     for (int i = 0; i < numberOfSteps; ++i)
     {
         float normalizedValue = static_cast<float>(i * stepWidth);
-        float transformedValue = transformValueByApplyingShapePowerFunction(normalizedValue);
+        float transformedValue = applyShapePowerFunction(normalizedValue);
         
         std::cout << "step [" << i << "], "
                      "normalized value [" << normalizedValue << "] "
@@ -454,6 +457,7 @@ void EnvelopeGate::EnvelopeParameters
 }
 
 
+///////////////////////////////////////////////////////
 // Implementation of main UDT2: EnvelopeGate:
 
 EnvelopeGate::EnvelopeGate()
@@ -636,7 +640,27 @@ int main()
         
         EnvelopeGate envelopeGate {};
 
-        std::cout << "dumping transformation shape using 11 steps" << std::endl;
+        std::cout << "dumping default linear transformation shape" << std::endl;
+        envelopeGate.envelopeParameters.dumpShape (11);        
+
+        std::cout << std::endl
+                  << "changing transformation shape to midPoint at 0.7"
+                  << std::endl;
+
+        double attackTimeInSeconds  = 0.005;
+        double decayTimeInSeconds   = 0.010;
+        double releaseTimeInSeconds = 0.015;
+        float sustainLevel = 0.5;
+        double midValuePoint = 0.7;
+
+        envelopeGate.envelopeParameters
+                    .adjustParameters (attackTimeInSeconds, 
+                                       decayTimeInSeconds, 
+                                       sustainLevel, 
+                                       releaseTimeInSeconds, 
+                                       midValuePoint);
+
+        std::cout << "dumping modified transformation shape" << std::endl;
         envelopeGate.envelopeParameters.dumpShape (11);        
         
         std::cout << std::endl;
