@@ -344,7 +344,10 @@ struct EnvelopeGate
         //     1) transform value by applying shape power function (or inverse)
         float applyShapePowerFunction (float value, bool computeInverseFunction = false);
 
-        //     2) adjust parameters. midValuePoint is the normalized value in (0,1) where the shape transform should reach 0.5 
+        //     2) adjust parameters. midValuePoint is the normalized value in (0,1) 
+        //         where the shape transform should reach 0.5
+        //        CAUTION: must NOT be called when the EnvelopeGate is active 
+        //        (i.e. in a state different from ENVELOPESTATE_OFF)
         void adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, float sustainLevel, 
                                double releaseTimeInSeconds, double midValuePoint = 0.5, double sampleRateInHz = 44100);
 
@@ -353,7 +356,7 @@ struct EnvelopeGate
     };
 
     // enclosing UDT2: EnvelopeGate
-    EnvelopeGate();
+    EnvelopeGate(float sustainLevel = 1);
     ~EnvelopeGate();
 
     // 5 properties:
@@ -362,14 +365,16 @@ struct EnvelopeGate
     //     2) envelope state (int) 0: off, 1:attack, 2:decay, 3:sustain, 4:release
     //        obviously one should use an enum here but we do not know about enums yet.
     int envelopeState {ENVELOPESTATE_OFF};
-    //     3) time spent in current state in samples (not updated for OFF state)
-    int timeSpentInCurrentStateInSamples {0};
-    //     4) normalized target value approached by current state
-    float normalizedTargetValueInCurrentState {0};
-    //     5) TODO
+    //     3) target value approached by current state
+    float targetValueInCurrentState {0};
+    //     4) slope with respect to normalized values (before applying shape transform)
+    float normalizedValueSlopeInCurrentState {0};
+    //     5) previous computed sample
+    float lastComputedSample {0};
     // 3 things it can do:
     //     1) trigger envelope (bool keyPressed, bool allowRetriggger)
-    bool triggerEnvelope (bool keyPressed, bool allowRetrigger = true); // returns true if an active envelope has been retriggered by a new key press
+    //        returns true if an active envelope has been retriggered by a new key press
+    bool triggerEnvelope (bool keyPressed, bool allowRetrigger = true); 
 
     //     2) get next sample for envelope gate
     float computeNextEnvelopeGateSample();
@@ -408,6 +413,8 @@ float EnvelopeGate::EnvelopeParameters
 
 // 2) adjust parameters. 
 // midValuePoint is the normalized value in (0,1) where the shape transform should reach 0.5 
+// CAUTION: must NOT be called when the EnvelopeGate is active 
+// (i.e. in a state different from ENVELOPESTATE_OFF)
 
 void EnvelopeGate::EnvelopeParameters
     ::adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, 
@@ -460,7 +467,8 @@ void EnvelopeGate::EnvelopeParameters
 ///////////////////////////////////////////////////////
 // Implementation of main UDT2: EnvelopeGate:
 
-EnvelopeGate::EnvelopeGate()
+EnvelopeGate::EnvelopeGate (float sustainLevel)
+    : envelopeParameters (sustainLevel)
 {
     std::cout << "constructor EnvelopeGate" << std::endl;    
 }
@@ -479,19 +487,31 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
         if (envelopeState != ENVELOPESTATE_OFF 
             && envelopeState != ENVELOPESTATE_RELEASE)
         {
+            // TODO: switch to release state 
             envelopeState = ENVELOPESTATE_RELEASE;
             timeSpentInCurrentStateInSamples = 0;
         }
         return false;
     }
-
-    bool retriggerHappened = envelopeState != ENVELOPESTATE_OFF 
-                             && allowRetrigger;
+    // { keyPressed }
     
+    if (envelopeState != ENVELOPESTATE_OFF && !allowRetrigger) 
+    {
+        std::cout << "Ignoring attempt to retrigger since allowRetrigger = false" 
+                  << std::endl;
+        return false;
+    }
+
+
+    // TODO: switch to attack state
+    if (attackTimeInSamples == 0) {
+        
+    }
     envelopeState = ENVELOPESTATE_ATTACK;
     timeSpentInCurrentStateInSamples = 0;
     normalizedTargetValueInCurrentState = 1.0f;
 
+    
     return retriggerHappened;
 }
 
@@ -505,24 +525,27 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
 
     if (envelopeState == ENVELOPESTATE_ATTACK)
     {
-        // time expired ? 
-        // target value reached: move to decay state
-        // target value not reached: update allowable time
-        // else: recompute slope
+        // target value reached or zero attack time => switch to decay state
+
+        // else: compute next value
+        
     }
 
     if (envelopeState == ENVELOPESTATE_DECAY)
     {
-        // time expired ? move to sustain state
+        // target value reached or zero decay time => switch to sustain state
+
+        // else: compute next value
     }
 
     if (envelopeState == ENVELOPESTATE_SUSTAIN)
     {
+        // zero sustain: switch to off state
         // repeat sustain value
     }
 
     // we are in envelopeState == ENVELOPESTATE_RELEASE
-    // time expired or 0 reached? move to off state
+    // zero reached or zero release time? move to off state
         
     return 0;
 }
