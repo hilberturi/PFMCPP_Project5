@@ -490,8 +490,8 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
             // switch to release state 
             envelopeState = ENVELOPESTATE_RELEASE;
             targetValueInCurrentState = 0;
-            
             int releaseTimeInSamples = envelopeParameters.releaseTimeInSamples;
+            
             if (releaseTimeInSamples > 0)
             {
                 double normalizedDelta = 
@@ -504,7 +504,7 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
             else
             {
                 // slope is irrelevant in this case since we'll skip forward to OFF mode
-                lastComputedSample = 0;
+                lastComputedSample = targetValueInCurrentState;
                 normalizedValueSlopeInCurrentState = 0;
             }
         }
@@ -523,7 +523,8 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
 
     bool retriggerHappened = envelopeState != ENVELOPESTATE_OFF;
     
-    if (! retriggerHappened) {
+    if (! retriggerHappened)
+    {
         lastComputedSample = 0;
         // otherwise well keep the last value as a starting point for attack
     }
@@ -545,7 +546,7 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
     else
     {
         // slope is irrelevant in this case since we'll skip forward to DECAY mode
-        lastComputedSample = 1;
+        lastComputedSample = targetValueInCurrentState;
         normalizedValueSlopeInCurrentState = 0;
     }
     return retriggerHappened;
@@ -561,28 +562,44 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
 
     if (envelopeState == ENVELOPESTATE_ATTACK)
     {
-        // target value reached or zero attack time => switch to decay state
-
-        // else: compute next value
-        
+        if (lastComputedSample >= targetValueInCurrentState)
+        {
+            // target value reached  => switch to decay state
+            // TOODO ###########    
+        }
+        else
+        {
+            // compute next value and return
+            // TODO #############
+        }        
     }
 
     if (envelopeState == ENVELOPESTATE_DECAY)
     {
-        // target value reached or zero decay time => switch to sustain state
-
-        // else: compute next value
+        if (lastComputedSample <= targetValueInCurrentState)
+        {
+            // target value reached => switch to sustain state
+            // TODO ############
+        }
+        else
+        {
+            // else: compute next value and return
+            // TODO ##########
+        }
     }
 
     if (envelopeState == ENVELOPESTATE_SUSTAIN)
     {
         // zero sustain: switch to off state
         // repeat sustain value
+        // TODO #########
     }
 
-    // we are in envelopeState == ENVELOPESTATE_RELEASE
+    // { envelopeState == ENVELOPESTATE_RELEASE }
+    
     // zero reached or zero release time? move to off state
-        
+    // TODO ########
+    
     return 0;
 }
 
