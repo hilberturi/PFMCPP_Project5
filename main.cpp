@@ -313,9 +313,8 @@ void Oscillator::dumpSamples (int numSamples, bool restoreCurrentPhase)
  */
 struct EnvelopeGate
 {
-
     // we do not know about enums yet and are instructed to use primitive
-    // types such as 'int', so I will define some constant expressions 
+    // types such as 'int', so I will define some constant int expressions 
     // instead of introducing an enum in order to comply with instructions:
     static constexpr int ENVELOPESTATE_OFF {0};
     static constexpr int ENVELOPESTATE_ATTACK {1};
@@ -323,11 +322,11 @@ struct EnvelopeGate
     static constexpr int ENVELOPESTATE_SUSTAIN {3};
     static constexpr int ENVELOPESTATE_RELEASE {4};
 
-    // UDT2: Nested UDT: Envelope Gate Parameters
-    struct EnvelopeGateParameters
+    // UDT2: Nested UDT: Envelope Parameters
+    struct EnvelopeParameters
     {
-        EnvelopeGateParameters();
-        ~EnvelopeGateParameters();
+        EnvelopeParameters();
+        ~EnvelopeParameters();
 
         // 5 properties:
         //     1) attack time in samples (int)
@@ -338,22 +337,19 @@ struct EnvelopeGate
         float normalizedSustainLevel;
         //     4) release time in samples (int)
         int releaseTimeInSamples;
-        //     5) skew factor / shape (float) 
-        //        point in (0..1) at which a level of 0.5 shall be reached
+        //     5) exponent for shape power function
         float exponentOfShapePowerFunction = 1; // default corresponds to linear shape
 
         // 3 things it can do:
         //     1) transform value by applying shape power function (or inverse)
         float transformValueByApplyingShapePowerFunction (float value, bool computeInverseFunction = false);
 
-        //     2) adjust parameters (with values given in Hz and sample rate)
-        // Todo: really use normalized sustain level here?
-        // Todo: really supply sample rate here?
-        void adjustParameters (float attackTimeInSeconds, float decayTimeInSeconds, float normalizedSustainLevel, 
-                               float releaseTimeInSeconds, float skewFactor = 0.5f, float sampleRateInHz = 44100);
+        //     2) adjust parameters. midValuePoint is the normalized value in (0,1) where the shape transform should reach 0.5 
+        void adjustParameters (float attackTimeInSeconds, float decayTimeInSeconds, float sustainLevel, 
+                               float releaseTimeInSeconds, float midValuePoint = 0.5f, float sampleRateInHz = 44100);
 
         //     3) something that requires a loop => dump shape
-        void dumpShape (int numberOfSteps);
+        void dumpShape (int numberOfSteps = 11);
     };
 
     // enclosing UDT2: EnvelopeGate
@@ -361,40 +357,41 @@ struct EnvelopeGate
     ~EnvelopeGate();
 
     // 5 properties:
-    //     1) Envelope Gate Parameters (nested UDT)
-    EnvelopeGateParameters envelopeGateParameters;
+    //     1) Envelope Parameters (nested UDT)
+    EnvelopeParameters envelopeParameters;
     //     2) envelope state (int) 0: off, 1:attack, 2:decay, 3:sustain, 4:release
     //        obviously one should use an enum here but we do not know about enums yet.
-    int envelopeState {0};
-    //     3) current time in state in samples
-    int currentTimeInStateInSamples {0};
-    //     4) TODO
+    int envelopeState {ENVELOPESTATE_OFF};
+    //     3) time spent in current state in samples (not updated for OFF state)
+    int timeSpentInCurrentStateInSamples {0};
+    //     4) normalized target value approached by current state
+    float normalizedTargetValueInCurrentState {0};
     //     5) TODO
     // 3 things it can do:
     //     1) trigger envelope (bool keyPressed, bool allowRetriggger)
-    bool triggerEnvelope (bool keyPressed, bool allowRetrigger = false); // returns true if an active envelope has been retriggered by a new key press
+    bool triggerEnvelope (bool keyPressed, bool allowRetrigger = true); // returns true if an active envelope has been retriggered by a new key press
 
     //     2) get next sample for envelope gate
     float computeNextEnvelopeGateSample();
 
     //     3) dump envelope gate response, assuming that the key is being pressed for numSamplesKeyPressed
-    void dumpEnvelopeGateResponse (int numSamplesKeyPressed);
+    void dumpEnvelopeGateResponse (int numSamplesKeyPressed, int displayEveryNthStep = 1, int maxStepsAllowed = 1000000);
 };
 
-// Implementation of nested UDT: EnvelopeGateParameters:
+// Implementation of nested UDT: EnvelopeParameters:
 
-EnvelopeGate::EnvelopeGateParameters::EnvelopeGateParameters()
+EnvelopeGate::EnvelopeParameters::EnvelopeParameters()
 {
-    std::cout << "constructor EnvelopeGateParameters" << std::endl;
+    std::cout << "constructor EnvelopeParameters" << std::endl;
 }
 
-EnvelopeGate::EnvelopeGateParameters::~EnvelopeGateParameters()
+EnvelopeGate::EnvelopeParameters::~EnvelopeParameters()
 {
-    std::cout << "destructor EnvelopeGateParameters" << std::endl;    
+    std::cout << "destructor EnvelopeParameters" << std::endl;    
 }
 
 // 1) transform value by applying shape power function (or inverse function depending on flag)
-float EnvelopeGate::EnvelopeGateParameters
+float EnvelopeGate::EnvelopeParameters
     ::transformValueByApplyingShapePowerFunction (float value, bool computeInverseFunction)
 {
     if (computeInverseFunction)
@@ -406,22 +403,56 @@ float EnvelopeGate::EnvelopeGateParameters
     return powf (value, exponentOfShapePowerFunction);
 }
 
-// 2) adjust parameters (with values given in Hz and sample rate)
-// Todo: really use normalized sustain level here?
-// Todo: really supply sample rate here?
-void EnvelopeGate::EnvelopeGateParameters
+// 2) adjust parameters. 
+// midValuePoint is the normalized value in (0,1) where the shape transform should reach 0.5 
+
+void EnvelopeGate::EnvelopeParameters
     ::adjustParameters (float attackTimeInSeconds, float decayTimeInSeconds, 
-                        float newNormalizedSustainLevel, float releaseTimeInSeconds, 
-                        float skewFactor, float sampleRateInHz)
+                        float sustainLevel, float releaseTimeInSeconds, 
+                        float midValuePoint, float sampleRateInHz)
 {
-    
+    attackTimeInSamples = static_cast<int>(attackTimeInSeconds * sampleRateInHz + 0.5);
+    decayTimeInSamples = static_cast<int>(decayTimeInSeconds * sampleRateInHz + 0.5);
+    releaseTimeInSamples = static_cast<int>(releaseTimeInSeconds * sampleRateInHz + 0.5);
+
+    if (midValuePoint <= 0 || midValuePoint >= 1)
+    {
+        std::cout << "Invalid parameter [" << midValuePoint << "], "
+                     "must be in between 0 and 1 (exclusive) "
+                     "=> using default [0.5]" << std::endl;
+        
+        midValuePoint = 0.5f;               
+    }
+    exponentOfShapePowerFunction = static_cast<float>(log (0.5) / log (midValuePoint));
+
+    normalizedSustainLevel = transformValueByApplyingShapePowerFunction (sustainLevel, true);
 }
 
 // 3) something that requires a loop => dump shape
-void EnvelopeGate::EnvelopeGateParameters::dumpShape (int numberOfSteps)
+void EnvelopeGate::EnvelopeParameters
+    ::dumpShape (int numberOfSteps)
 {
+    if (numberOfSteps <= 2)
+    {
+        std::cout << "Invalid parameter [" << numberOfSteps << "], "
+                     "using default [11] instead" << std::endl;
+        numberOfSteps = 11;        
+    }
     
+    double stepWidth = 1.0 / (numberOfSteps - 1);
+
+    for (int i = 0; i < numberOfSteps; ++i)
+    {
+        float normalizedValue = static_cast<float>(i * stepWidth);
+        float transformedValue = transformValueByApplyingShapePowerFunction(normalizedValue);
+        
+        std::cout << "step [" << i << "], "
+                     "normalized value [" << normalizedValue << "] "
+                     "=> transformed value [" << transformedValue << "]" 
+                  << std::endl;
+    }
 }
+
 
 // Implementation of main UDT2: EnvelopeGate:
 
@@ -445,7 +476,7 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
             && envelopeState != ENVELOPESTATE_RELEASE)
         {
             envelopeState = ENVELOPESTATE_RELEASE;
-            currentTimeInStateInSamples = 0;
+            timeSpentInCurrentStateInSamples = 0;
         }
         return false;
     }
@@ -454,6 +485,8 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
                              && allowRetrigger;
     
     envelopeState = ENVELOPESTATE_ATTACK;
+    timeSpentInCurrentStateInSamples = 0;
+    normalizedTargetValueInCurrentState = 1.0f;
 
     return retriggerHappened;
 }
@@ -465,45 +498,93 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
     {
         return 0;        
     }
+
     if (envelopeState == ENVELOPESTATE_ATTACK)
     {
-        
+        // time expired ? 
+        // target value reached: move to decay state
+        // target value not reached: update allowable time
+        // else: recompute slope
     }
+
     if (envelopeState == ENVELOPESTATE_DECAY)
     {
-        
+        // time expired ? move to sustain state
     }
+
     if (envelopeState == ENVELOPESTATE_SUSTAIN)
     {
-        
+        // repeat sustain value
     }
-    if (envelopeState == ENVELOPESTATE_RELEASE)
-    {
+
+    // we are in envelopeState == ENVELOPESTATE_RELEASE
+    // time expired or 0 reached? move to off state
         
-    }
-    // all cases have been covered
     return 0;
 }
 
 // 3) dump envelope gate response, assuming that the key is being pressed for numSamplesKeyPressed
-void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed)
+void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
+                                             int displayEveryNthStep, 
+                                             int maxStepsAllowed)
 {
-    // TODO: note-on trigger 
-    for (int i = 0; i < numSamplesKeyPressed; ++i)
+    if (displayEveryNthStep <= 0)
     {
-        
+        std::cout << "Invalid parameter [" << displayEveryNthStep << "], "
+                     "using default [1] instead" << std::endl;
+        displayEveryNthStep = 1;
     }
 
-    // TODO: key-press false trigger 
-    // TODO: dump output as long as generated samples are not zero.
+    std::cout << "Triggering fresh envelope with key press" << std::endl;
+    envelopeState = ENVELOPESTATE_OFF;
+    triggerEnvelope (true);
     
+    int i = 0;
+    float currentEnvelopeSample {0};
+    
+    while (i < numSamplesKeyPressed)
+    {
+        currentEnvelopeSample = computeNextEnvelopeGateSample();
+        
+        if (i % displayEveryNthStep == 0)
+        {
+            std::cout << "step [" << i << "], EG sample [" << currentEnvelopeSample << "]" << std::endl;
+        }
+        ++i;
+    }
+
+    std::cout << "Switching to release phase" << std::endl;
+    triggerEnvelope (false);
+    
+    // dump output as long as generated samples are not zero.
+    // for safety reasons, the number of steps will be limited
+    // by maxStepsAllowed
+    
+    while (i < maxStepsAllowed && currentEnvelopeSample > 0)
+    {
+        // by the D.R.Y. principle, this repeated block should be extracted
+        // into its own member function, but I have already reached
+        // the maximum number of functions allowed for the UDt so
+        // I won't do it this time
+        
+        currentEnvelopeSample = computeNextEnvelopeGateSample();
+        
+        if (i % displayEveryNthStep == 0)
+        {
+            std::cout << "step [" << i << "], EG sample [" << currentEnvelopeSample << "]" << std::endl;
+        }
+        ++i;
+    }
+
+    std::cout << "Finished envelope dump" << std::endl;
 }
 
 
 
 
 /*
- copied UDT 3:
+ copied UDT 3: !!!!!###### (actually a new UDT since I skipped Project 3)
+ UDT3 does not use a nested UDT.
  */
 
 /*
@@ -544,8 +625,21 @@ int main()
     
         std::cout << "dumping nested SingleCycleWaveform" << std::endl;
         oscillator.waveform.dumpWaveform();
+        
+        std::cout << std::endl;
     }
         
-    
+    {
+        // block for testing UDT2: EnvelopeGate and nested EnvelopeParameters
+
+        std::cout << std::endl;
+        
+        EnvelopeGate envelopeGate {};
+
+        std::cout << "dumping transformation shape using 11 steps" << std::endl;
+        envelopeGate.envelopeParameters.dumpShape (11);        
+        
+        std::cout << std::endl;
+    }
     std::cout << "good to go!" << std::endl;
 }
