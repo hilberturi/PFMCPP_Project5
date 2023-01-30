@@ -923,7 +923,7 @@ struct SimpleMonoSynth
     //   1) oscillator (I could also have chosen the compound oscillator)
     Oscillator oscillator;
     //   2) envelope gate
-    EnvelopeGate envelopeGate;
+    EnvelopeGate envelopeGate {};
     //   3) Low-frequency oscillator
     LowFrequencyOscillator lfo;
     //   4) amount of LFO level modulation in [0, 1]
@@ -931,10 +931,42 @@ struct SimpleMonoSynth
     //   5) allow !!!
 
     // Things it can do:
-    //   1) generateSample()
-    //   2) dumpSamples(numSamplesTotal, numSamplesKeyPressed, maxStepsAllowed)
+    //   1) generate sample
+    float generateSample();
+    //   2) dump given number of samples on console 
+    void dumpSamples (int numSamplesTotal, int numSamplesKeyPressed, int maxStepsAllowed = 500);
 };
 
+///////////////////////////////////////////////////////
+// Implementation of UDT5: SimpleMonoSynth
+
+SimpleMonoSynth::SimpleMonoSynth (float sampleRateInHz)
+    : oscillator("osc", sampleRateInHz), lfo (sampleRateInHz)
+{
+   std::cout << "constructor SimpleMonoSynth" << std::endl;                
+}
+
+SimpleMonoSynth::~SimpleMonoSynth()
+{
+   std::cout << "destructor SimpleMonoSynth" << std::endl;                    
+}
+
+
+// 1) generate sample
+float SimpleMonoSynth::generateSample()
+{
+    float unscaledSample = oscillator.generateSample();
+    // float amplitude = (1.0f  - lfo.generateSample()
+    // TODO hier weitermachen
+}
+
+
+// 2) dump given number of samples on console 
+void SimpleMonoSynth::dumpSamples (int numSamplesTotal, int numSamplesKeyPressed, int maxStepsAllowed)
+{
+    
+}
+        
 /*
  MAKE SURE YOU ARE NOT ON THE MASTER BRANCH
 
