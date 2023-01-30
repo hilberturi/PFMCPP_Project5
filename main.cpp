@@ -815,9 +815,100 @@ void LowFrequencyOscillator::dumpToConsole (int totalNumSamples,
 
 
 /*
- new UDT 4:
+ new UDT 4: CompoundOscillator
  with 2 member functions
  */
+struct CompoundOscillator
+{
+    CompoundOscillator(float sampleRate = 44100);
+    ~CompoundOscillator();
+
+    // Properties:
+    // 1) Oscillator oscA
+    Oscillator oscA;
+    // 2) Oscillator oscB
+    Oscillator oscB;
+    // 3) mix balance of oscillators. 0 = oscA only, 1 = oscB only.
+    float balance = 0.5f;
+    // 4) detune in cent. oscA will be low and oscB will be sharp by given amount
+    float detuneInCent = 2.5f;
+    // 5) phase offset oscillator B. Initial phase compared to oscA will be shifted by given offset.
+    float phaseOffsetOscillatorB = 0;
+
+    // Things it can do:
+    // 1) resets both oscillators at once and adjusts parameters
+    void reset (float frequency, float initialPhaseOscA = 0);
+    // 2) generate sample by mixing samples of both embedded oscillators
+    float generateSample();
+    // 3) dump given number of generated samples on console
+    void dumpSamples(int numSamples, bool restoreCurrentPhase = false);
+};
+
+///////////////////////////////////////////////////////
+// Implementation of UDT4: CompoundOscillator
+
+CompoundOscillator::CompoundOscillator(float sampleRate)
+    : oscA("oscA", sampleRate), oscB("oscB", sampleRate)
+{
+   std::cout << "constructor CompoundOscillator" << std::endl;            
+}
+
+CompoundOscillator::~CompoundOscillator()
+{
+   std::cout << "destructor CompoundOscillator" << std::endl;                
+}
+
+
+// 1) resets both oscillators at once and adjusts parameters
+void CompoundOscillator::reset (float frequency, float initialPhaseOscA)
+{
+    float detuneFactor = (detuneInCent > 0 ? powf (2, detuneInCent / 1200) : 1);    
+    
+    oscA.reset (frequency / detuneFactor, initialPhaseOscA);
+    
+    float initialPhaseOscB = initialPhaseOscA + phaseOffsetOscillatorB;
+    
+    if (initialPhaseOscB > piTwiceFloat)
+    {
+        initialPhaseOscB -= piTwiceFloat;    
+    }
+    oscB.reset (frequency * detuneFactor, initialPhaseOscB);
+}
+
+
+// 2) generate sample by mixing samples of both embedded oscillators
+float CompoundOscillator::generateSample()
+{
+    return (1.0f - balance) * oscA.generateSample() + balance * oscB.generateSample();
+}
+
+
+// 3) dump given number of generated samples on console
+void CompoundOscillator::dumpSamples(int numSamples, bool restoreCurrentPhase)
+{
+    float currentPhaseOscABeforeDumpSamples = oscA.currentPhase;
+    float currentPhaseOscBBeforeDumpSamples = oscB.currentPhase;
+
+    for (int i = 0; i < numSamples; ++i)
+    {
+        float savedPhaseA = oscA.currentPhase;
+        float savedPhaseB = oscB.currentPhase;
+        float sample = generateSample();
+        
+        std::cout << "index [" << i << "], "
+                     "phaseA [" << savedPhaseA << "] "
+                     "phaseB [" << savedPhaseB << "] "
+                     "=> sample [" << sample << "]"
+                  << std::endl;
+    }
+
+    if (restoreCurrentPhase)
+    {
+        oscA.currentPhase = currentPhaseOscABeforeDumpSamples;
+        oscB.currentPhase = currentPhaseOscBBeforeDumpSamples;
+    }    
+}
+
 
 /*
  new UDT 5:
@@ -842,12 +933,15 @@ int main()
 {
     {
         // block for testing UDT1: Oscillator and nested UDT SingleCycleWaveform
-
+        
+        // PLEASE NOTE: I will not test generateSample() here because it is already
+        // called by the dump function (same for other UDTs).
+        
         Oscillator oscillator {"osc1"};
         
-        std::cout << "dumping 10 samples @ 4410 Hz:" << std::endl;
+        std::cout << "dumping 11 samples @ 4410 Hz:" << std::endl;
         oscillator.reset (4410);
-        oscillator.dumpSamples (10, true);
+        oscillator.dumpSamples (11, true);
         std::cout << std::endl;
     
         std::cout << "dumping nested SingleCycleWaveform" << std::endl;
@@ -913,6 +1007,22 @@ int main()
         lfo.dumpToConsole (99225, 11025);
         
         std::cout << std::endl;        
+    }
+
+    {
+        // block for testing UDT4: CompoundOscillator
+
+        std::cout << std::endl;        
+        
+        CompoundOscillator oscillator {44100};
+        std::cout << "dumping 11 samples @ 4410 Hz:" << std::endl;
+        oscillator.detuneInCent = 0;
+        oscillator.phaseOffsetOscillatorB = piTwiceFloat / 4.0f;
+        oscillator.reset (4410);
+        // oscA has initialPhase 0 and oscB has initialPhase 90 deg.        
+        oscillator.dumpSamples (11, true);
+    
+        std::cout << std::endl;    
     }
     
     std::cout << "good to go!" << std::endl;
