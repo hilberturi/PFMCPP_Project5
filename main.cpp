@@ -714,7 +714,7 @@ void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
  */
 struct LowFrequencyOscillator
 {
-    LowFrequencyOscillator(double sampleRateInHz = 44100);
+    LowFrequencyOscillator (double sampleRateInHz = 44100);
     ~LowFrequencyOscillator();
     
     // 5 properties:
@@ -723,17 +723,17 @@ struct LowFrequencyOscillator
     //    2) angular velocity per step, computed from speed and sample rate
     double phaseIncrementPerStep;
     //    3) rise time in samples => amplitude delta per step
-    int riseTimeInSamples {0};
+    double amplitudeDeltaPerStep {0};
     //    4) current phase
     double currentPhase {0};
     //    5) current amplitude
     double currentAmplitude {1};
 
     // 3 things it can do:
-    //    1) reset. this retriggers the lfo and adjust several parameters
-    void reset (double speedInHz, double initialPhase, double riseTime);
+    //    1) reset. This retriggers the LFO and adjust several parameters
+    void reset (double speedInHz = 1, double initialPhase = 0, double riseTimeInSeconds = 0);
 
-    //    2) generate single sample. This is a bipolar LFO with samples in [-1, 1]
+    //    2) generate single sample. This is a bipolar LFO with samples in [-1, 1].
     float generateSample();
 
     //    3) dump LFO output to console
@@ -743,6 +743,75 @@ struct LowFrequencyOscillator
 ///////////////////////////////////////////////////////
 // Implementation of UDT3: LowFrequencyOscillator
 
+LowFrequencyOscillator::LowFrequencyOscillator (double sampleRate)
+    : sampleRateInHz(sampleRate), phaseIncrementPerStep(piTwice / sampleRate)
+{
+    std::cout << "constructor LowFrequencyOscillator" << std::endl;        
+}
+
+LowFrequencyOscillator::~LowFrequencyOscillator()
+{
+    std::cout << "destructor LowFrequencyOscillator" << std::endl;            
+}
+
+// 3 things it can do:
+// 1) reset. This retriggers the LFO and adjust several parameters
+void LowFrequencyOscillator::reset (double speedInHz, double initialPhase, 
+                                    double riseTimeInSeconds)
+{
+    phaseIncrementPerStep = speedInHz * piTwice / sampleRateInHz;
+    currentPhase = initialPhase;
+    
+    if (riseTimeInSeconds < 0)
+    {
+        std::cout << "illegal negative rise time [" << riseTimeInSeconds << "] "
+                     "=> using default [0] instead"
+                  << std::endl;
+        
+        riseTimeInSeconds = 0;
+    }
+    
+    amplitudeDeltaPerStep = riseTimeInSeconds / sampleRateInHz;
+    currentAmplitude = (riseTimeInSeconds > 0 ? 0 : 1);
+}
+
+// 2) generate single sample. This is a bipolar LFO with samples in [-1, 1].
+float LowFrequencyOscillator::generateSample()
+{
+    if (currentAmplitude < 1) 
+    {
+        currentAmplitude += amplitudeDeltaPerStep;
+    }
+
+    float unscaledSample = static_cast<float> (sin (currentPhase));    
+    currentPhase += phaseIncrementPerStep;
+    
+    if (currentPhase >= piTwice)
+    {
+        currentPhase -= piTwice;
+    }
+    
+    return static_cast<float>(currentAmplitude) * unscaledSample;
+}
+
+// 3) dump LFO output to console
+void LowFrequencyOscillator::dumpToConsole (int totalNumSamples, 
+                                            int displayEveryNthStep)
+{
+    for (int i = 0; i < totalNumSamples; ++i)
+    {
+        double savedPhase = currentPhase;
+        float sample = generateSample();
+
+        if (i % displayEveryNthStep == 0)
+        {
+            std::cout << "index [" << i << "], "
+                         "phase [" << savedPhase << "] "
+                         "=> sample [" << sample << "]"
+                      << std::endl;
+        }
+    }
+}
 
 
 /*
@@ -824,5 +893,27 @@ int main()
         
         std::cout << std::endl;        
     }
+
+    {
+        // block for testing UDT3: LowFrequencyOscillator (no nested type)
+
+        std::cout << std::endl;        
+
+        LowFrequencyOscillator lfo {44100};
+
+        double speedInHz = 1; 
+        double initialPhase = 0; 
+        double riseTimeInSeconds = 1;
+        
+        lfo.reset (speedInHz, initialPhase, riseTimeInSeconds);
+
+        std::cout << "dumping LFO, speed 1 Hz, sample rate 44100 Hz, rise time 1s"
+                  << std::endl;        
+        
+        lfo.dumpToConsole (99225, 11025);
+        
+        std::cout << std::endl;        
+    }
+    
     std::cout << "good to go!" << std::endl;
 }
