@@ -365,10 +365,11 @@ struct EnvelopeGate
     //     2) envelope state (int) 0: off, 1:attack, 2:decay, 3:sustain, 4:release
     //        obviously one should use an enum here but we do not know about enums yet.
     int envelopeState {ENVELOPESTATE_OFF};
-    //     3) normalized target value approached by current state
+    //     3) normalized target value approached by current state 
+    //        ('normalized' means target before applying shape transform)
     float normalizedTargetValueInCurrentState {0};
-    //     4) slope with respect to normalized values (before applying shape transform)
-    float normalizedValueSlopeInCurrentState {0};
+    //     4) change per step in order to reach normalized target in given number of steps
+    float normalizedDeltaPerStep {0};
     //     5) previous computed normalized sample
     float lastComputedNormalizedSample {0};
     // 3 things it can do:
@@ -496,14 +497,14 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
             {
                 double normalizedDelta = 
                     static_cast<double>(-lastComputedNormalizedSample);
-                normalizedValueSlopeInCurrentState = 
+                normalizedDeltaPerStep = 
                     static_cast<float> (normalizedDelta / releaseTimeInSamples);
             }
             else
             {
                 // slope is irrelevant in this case since we'll skip forward to OFF mode
                 lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
-                normalizedValueSlopeInCurrentState = 0;
+                normalizedDeltaPerStep = 0;
             }
         }
         return false;
@@ -536,14 +537,14 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
     {
         double normalizedDelta = 
             static_cast<double>(1 - lastComputedNormalizedSample);
-        normalizedValueSlopeInCurrentState = 
+        normalizedDeltaPerStep = 
             static_cast<float> (normalizedDelta / attackTimeInSamples);
     }
     else
     {
         // slope is irrelevant in this case since we'll skip forward to DECAY mode
         lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
-        normalizedValueSlopeInCurrentState = 0;
+        normalizedDeltaPerStep = 0;
     }
     return retriggerHappened;
 }
@@ -575,20 +576,20 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
                 double normalizedDelta = 
                     static_cast<double>(envelopeParameters.normalizedSustainLevel
                                         - lastComputedNormalizedSample);
-                normalizedValueSlopeInCurrentState = 
+                normalizedDeltaPerStep = 
                     static_cast<float> (normalizedDelta / decayTimeInSamples);
             }
             else
             {
                 // slope is irrelevant in this case since we'll skip forward to SUSTAIN mode
                 lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
-                normalizedValueSlopeInCurrentState = 0;
+                normalizedDeltaPerStep = 0;
             }
         }
         else
         {
             // compute next value in decay state and return
-            lastComputedNormalizedSample += normalizedValueSlopeInCurrentState;
+            lastComputedNormalizedSample += normalizedDeltaPerStep;
             return envelopeParameters.applyShapePowerFunction (lastComputedNormalizedSample);
         }        
     }
@@ -603,11 +604,11 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
             envelopeState = ENVELOPESTATE_SUSTAIN;
             normalizedTargetValueInCurrentState = envelopeParameters.normalizedSustainLevel;
             lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
-            normalizedValueSlopeInCurrentState = 0;
+            normalizedDeltaPerStep = 0;
         }
         else
         {
-            lastComputedNormalizedSample += normalizedValueSlopeInCurrentState;
+            lastComputedNormalizedSample += normalizedDeltaPerStep;
             return envelopeParameters.applyShapePowerFunction (lastComputedNormalizedSample);
         }
     }
@@ -628,10 +629,10 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
         envelopeState = ENVELOPESTATE_OFF;
         normalizedTargetValueInCurrentState = 0;
         lastComputedNormalizedSample = 0;
-        normalizedValueSlopeInCurrentState = 0;
+        normalizedDeltaPerStep = 0;
         return 0;
     }
-    lastComputedNormalizedSample += normalizedValueSlopeInCurrentState;
+    lastComputedNormalizedSample += normalizedDeltaPerStep;
     return envelopeParameters.applyShapePowerFunction (lastComputedNormalizedSample);
 }
 
