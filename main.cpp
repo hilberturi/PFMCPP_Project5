@@ -365,12 +365,12 @@ struct EnvelopeGate
     //     2) envelope state (int) 0: off, 1:attack, 2:decay, 3:sustain, 4:release
     //        obviously one should use an enum here but we do not know about enums yet.
     int envelopeState {ENVELOPESTATE_OFF};
-    //     3) target value approached by current state
-    float targetValueInCurrentState {0};
+    //     3) normalized target value approached by current state
+    float normalizedTargetValueInCurrentState {0};
     //     4) slope with respect to normalized values (before applying shape transform)
     float normalizedValueSlopeInCurrentState {0};
-    //     5) previous computed sample
-    float lastComputedSample {0};
+    //     5) previous computed normalized sample
+    float lastComputedNormalizedSample {0};
     // 3 things it can do:
     //     1) trigger envelope (bool keyPressed, bool allowRetriggger)
     //        returns true if an active envelope has been retriggered by a new key press
@@ -408,7 +408,7 @@ float EnvelopeGate::EnvelopeParameters
     }
 
     // else: return result of applying power function with given shape exponent to value
-    return powf (value, exponentOfShapePowerFunction);
+    return value <= 0 ? 0 : powf (value, exponentOfShapePowerFunction);
 }
 
 // 2) adjust parameters. 
@@ -489,22 +489,20 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
         {
             // switch to release state 
             envelopeState = ENVELOPESTATE_RELEASE;
-            targetValueInCurrentState = 0;
+            normalizedTargetValueInCurrentState = 0;
             int releaseTimeInSamples = envelopeParameters.releaseTimeInSamples;
             
             if (releaseTimeInSamples > 0)
             {
                 double normalizedDelta = 
-                    static_cast<double>(- envelopeParameters
-                                          .applyShapePowerFunction (lastComputedSample, 
-                                                                    true));                
+                    static_cast<double>(-lastComputedNormalizedSample);
                 normalizedValueSlopeInCurrentState = 
                     static_cast<float> (normalizedDelta / releaseTimeInSamples);
             }
             else
             {
                 // slope is irrelevant in this case since we'll skip forward to OFF mode
-                lastComputedSample = targetValueInCurrentState;
+                lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
                 normalizedValueSlopeInCurrentState = 0;
             }
         }
@@ -525,34 +523,37 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
     
     if (! retriggerHappened)
     {
-        lastComputedSample = 0;
+        lastComputedNormalizedSample = 0;
         // otherwise well keep the last value as a starting point for attack
     }
 
     // switch to ATTACK state
     envelopeState = ENVELOPESTATE_ATTACK;
-    targetValueInCurrentState = 1;
+    normalizedTargetValueInCurrentState = 1;
     int attackTimeInSamples = envelopeParameters.attackTimeInSamples;
 
     if (attackTimeInSamples > 0)
     {
         double normalizedDelta = 
-            static_cast<double>(1 - envelopeParameters
-                                    .applyShapePowerFunction (lastComputedSample, 
-                                                              true));
+            static_cast<double>(1 - lastComputedNormalizedSample);
         normalizedValueSlopeInCurrentState = 
             static_cast<float> (normalizedDelta / attackTimeInSamples);
     }
     else
     {
         // slope is irrelevant in this case since we'll skip forward to DECAY mode
-        lastComputedSample = targetValueInCurrentState;
+        lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
         normalizedValueSlopeInCurrentState = 0;
     }
     return retriggerHappened;
 }
 
+
 // 2) get next sample for envelope gate
+// This member functions gets pretty long and violates D.R.Y. 
+// Obviously I'd normally break it up but for now, the UDT is limited 
+// to 3 member functions, so I keep it this way.
+
 float EnvelopeGate::computeNextEnvelopeGateSample()
 {
     if (envelopeState == ENVELOPESTATE_OFF)
@@ -562,46 +563,78 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
 
     if (envelopeState == ENVELOPESTATE_ATTACK)
     {
-        if (lastComputedSample >= targetValueInCurrentState)
+        if (lastComputedNormalizedSample >= normalizedTargetValueInCurrentState)
         {
             // target value reached  => switch to decay state
-            // TOODO ###########    
+            envelopeState = ENVELOPESTATE_DECAY;
+            normalizedTargetValueInCurrentState = envelopeParameters.normalizedSustainLevel;
+            int decayTimeInSamples = envelopeParameters.decayTimeInSamples;
+            
+            if (decayTimeInSamples > 0)
+            {
+                double normalizedDelta = 
+                    static_cast<double>(envelopeParameters.normalizedSustainLevel
+                                        - lastComputedNormalizedSample);
+                normalizedValueSlopeInCurrentState = 
+                    static_cast<float> (normalizedDelta / decayTimeInSamples);
+            }
+            else
+            {
+                // slope is irrelevant in this case since we'll skip forward to SUSTAIN mode
+                lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
+                normalizedValueSlopeInCurrentState = 0;
+            }
         }
         else
         {
-            // compute next value and return
-            // TODO #############
+            // compute next value in decay state and return
+            lastComputedNormalizedSample += normalizedValueSlopeInCurrentState;
+            return envelopeParameters.applyShapePowerFunction (lastComputedNormalizedSample);
         }        
     }
 
     if (envelopeState == ENVELOPESTATE_DECAY)
     {
-        if (lastComputedSample <= targetValueInCurrentState)
+        if (lastComputedNormalizedSample <= normalizedTargetValueInCurrentState)
         {
-            // target value reached => switch to sustain state
-            // TODO ############
+            // target value reached => switch to sustain state.
+            // TODO if sustain level is 0, we skip to off state:
+
+            envelopeState = ENVELOPESTATE_SUSTAIN;
+            normalizedTargetValueInCurrentState = envelopeParameters.normalizedSustainLevel;
+            lastComputedNormalizedSample = normalizedTargetValueInCurrentState;
+            normalizedValueSlopeInCurrentState = 0;
         }
         else
         {
-            // else: compute next value and return
-            // TODO ##########
+            lastComputedNormalizedSample += normalizedValueSlopeInCurrentState;
+            return envelopeParameters.applyShapePowerFunction (lastComputedNormalizedSample);
         }
     }
 
     if (envelopeState == ENVELOPESTATE_SUSTAIN)
     {
-        // zero sustain: switch to off state
-        // repeat sustain value
-        // TODO #########
+        // repeat sustain value. In this case, it would make sense to store the
+        // result of applying the shape function as well
+        return envelopeParameters.applyShapePowerFunction (lastComputedNormalizedSample);
     }
 
     // { envelopeState == ENVELOPESTATE_RELEASE }
+    // { normalizedTargetValueInCurrentState == 0 }
     
-    // zero reached or zero release time? move to off state
-    // TODO ########
-    
-    return 0;
+    if (lastComputedNormalizedSample <= normalizedTargetValueInCurrentState)
+    {
+        // zero reached, move to off state
+        envelopeState = ENVELOPESTATE_OFF;
+        normalizedTargetValueInCurrentState = 0;
+        lastComputedNormalizedSample = 0;
+        normalizedValueSlopeInCurrentState = 0;
+        return 0;
+    }
+    lastComputedNormalizedSample += normalizedValueSlopeInCurrentState;
+    return envelopeParameters.applyShapePowerFunction (lastComputedNormalizedSample);
 }
+
 
 // 3) dump envelope gate response, assuming that the key is being pressed for numSamplesKeyPressed
 void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
@@ -640,7 +673,7 @@ void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
     // for safety reasons, the number of steps will be limited
     // by maxStepsAllowed
     
-    while (i < maxStepsAllowed && currentEnvelopeSample > 0)
+    while (i < maxStepsAllowed)
     {
         // by the D.R.Y. principle, this repeated block should be extracted
         // into its own member function, but I have already reached
@@ -652,11 +685,23 @@ void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
         if (i % displayEveryNthStep == 0)
         {
             std::cout << "step [" << i << "], EG sample [" << currentEnvelopeSample << "]" << std::endl;
+
+            if (currentEnvelopeSample <= 0)
+            {
+                break;
+            }            
         }
         ++i;
     }
 
-    std::cout << "Finished envelope dump" << std::endl;
+    if (currentEnvelopeSample <= 0)
+    {
+        std::cout << "Finished envelope dump (zero level reached)" << std::endl;
+    }
+    else
+    {
+        std::cout << "Finished envelope dump (max steps exceeded)" << std::endl;
+    }
 }
 
 
@@ -740,6 +785,11 @@ int main()
         envelopeGate.envelopeParameters.dumpShape (11);        
         
         std::cout << std::endl;
+
+        std::cout << "dumping output of envelope gate" << std::endl;
+        envelopeGate.dumpEnvelopeGateResponse (882, 88, 1600);
+        
+        std::cout << std::endl;        
     }
     std::cout << "good to go!" << std::endl;
 }
