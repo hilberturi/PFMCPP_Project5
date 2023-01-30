@@ -911,9 +911,29 @@ void CompoundOscillator::dumpSamples(int numSamples, bool restoreCurrentPhase)
 
 
 /*
- new UDT 5:
+ new UDT 5: Simple Mono-Synth (without Filter)
  with 2 member functions
  */
+struct SimpleMonoSynth
+{
+    SimpleMonoSynth(float sampleRateInHz = 44100);
+    ~SimpleMonoSynth();
+
+    // 5 properties:
+    //   1) oscillator (I could also have chosen the compound oscillator)
+    Oscillator oscillator;
+    //   2) envelope gate
+    EnvelopeGate envelopeGate;
+    //   3) Low-frequency oscillator
+    LowFrequencyOscillator lfo;
+    //   4) amount of LFO level modulation in [0, 1]
+    float amountOfLfoLevelModulation {0};
+    //   5) allow !!!
+
+    // Things it can do:
+    //   1) generateSample()
+    //   2) dumpSamples(numSamplesTotal, numSamplesKeyPressed, maxStepsAllowed)
+};
 
 /*
  MAKE SURE YOU ARE NOT ON THE MASTER BRANCH
