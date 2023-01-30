@@ -551,9 +551,9 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
 
 
 // 2) get next sample for envelope gate
-// This member functions gets pretty long and violates D.R.Y. 
-// Obviously I'd normally break it up but for now, the UDT is limited 
-// to 3 member functions, so I keep it this way.
+// PLEASE NOTE: This member functions is pretty long and violates D.R.Y. 
+// Obviously I'd normally split it up into smaller pieces! But here, 
+// the UDT is limited to 3 member functions, so I'll keep it this way.
 
 float EnvelopeGate::computeNextEnvelopeGateSample()
 {
@@ -709,9 +709,41 @@ void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
 
 
 /*
- copied UDT 3: !!!!!###### (actually a new UDT since I skipped Project 3)
+ copied UDT 3: LowFrequencyOscillator / LFO (actually a new UDT since I skipped Project 3)
  UDT3 does not use a nested UDT.
  */
+struct LowFrequencyOscillator
+{
+    LowFrequencyOscillator(double sampleRateInHz = 44100);
+    ~LowFrequencyOscillator();
+    
+    // 5 properties:
+    //    1) sample rate
+    double sampleRateInHz;
+    //    2) angular velocity per step, computed from speed and sample rate
+    double phaseIncrementPerStep;
+    //    3) rise time in samples => amplitude delta per step
+    int riseTimeInSamples {0};
+    //    4) current phase
+    double currentPhase {0};
+    //    5) current amplitude
+    double currentAmplitude {1};
+
+    // 3 things it can do:
+    //    1) reset. this retriggers the lfo and adjust several parameters
+    void reset (double speedInHz, double initialPhase, double riseTime);
+
+    //    2) generate single sample. This is a bipolar LFO with samples in [-1, 1]
+    float generateSample();
+
+    //    3) dump LFO output to console
+    void dumpToConsole (int totalNumSamples, int displayEveryNthStep = 1);
+};
+
+///////////////////////////////////////////////////////
+// Implementation of UDT3: LowFrequencyOscillator
+
+
 
 /*
  new UDT 4:
