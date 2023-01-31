@@ -916,7 +916,7 @@ void CompoundOscillator::dumpSamples(int numSamples, bool restoreCurrentPhase)
  */
 struct SimpleMonoSynth
 {
-    SimpleMonoSynth(float sampleRateInHz = 44100);
+    SimpleMonoSynth(double sampleRateInHz = 44100);
     ~SimpleMonoSynth();
 
     // 5 properties:
@@ -928,20 +928,22 @@ struct SimpleMonoSynth
     LowFrequencyOscillator lfo;
     //   4) amount of LFO level modulation in [0, 1]
     float amountOfLfoLevelModulation {0};
-    //   5) allow !!!
-
+    //   5) amplitude as given by velocity of last playing note
+    float amplitudeOfPlayingNote {1};
     // Things it can do:
-    //   1) generate sample
+    //   1) trigger a note given midi pitch, velocity in 0..1. Trigger again with keyPressed = false for release of key.
+    void triggerNote (int midiNoteNumber, float velocity = 1, bool keyPressed = true, double tuningInHz = 440);
+    //   2) generate sample
     float generateSample();
-    //   2) dump given number of samples on console 
+    //   3) dump given number of samples on console 
     void dumpSamples (int numSamplesTotal, int numSamplesKeyPressed, int maxStepsAllowed = 500);
 };
 
 ///////////////////////////////////////////////////////
 // Implementation of UDT5: SimpleMonoSynth
 
-SimpleMonoSynth::SimpleMonoSynth (float sampleRateInHz)
-    : oscillator("osc", sampleRateInHz), lfo (sampleRateInHz)
+SimpleMonoSynth::SimpleMonoSynth (double sampleRateInHz)
+    : oscillator ("osc", static_cast<float>(sampleRateInHz)), lfo (sampleRateInHz)
 {
    std::cout << "constructor SimpleMonoSynth" << std::endl;                
 }
@@ -951,13 +953,50 @@ SimpleMonoSynth::~SimpleMonoSynth()
    std::cout << "destructor SimpleMonoSynth" << std::endl;                    
 }
 
+// 1) trigger a note given midi pitch, velocity in 0..1. Trigger again with keyPressed = false for release of key.
+void SimpleMonoSynth::triggerNote (int midiNoteNumber, float velocity, bool keyPressed, 
+                                   double tuningInHz)
+{
+    if (! keyPressed)
+    {
+        envelopeGate.triggerEnvelope (false); 
+        // all other settings will be ignored since we do not want to affect the release phase
+        return;
+    }
+    // { keyPressed == true }
+    
+    // assuming that MIDI note number 34 corresponds to A4 concert pitch (usually 440 Hz):
+    float frequency = static_cast<float> (tuningInHz * pow (2, (midiNoteNumber - 34) / 12.0));
 
-// 1) generate sample
+    // avoid clicks for frequency change by keeping phase for currently playing note if we retrigger 
+    // with a new note:
+    float initialPhase = 
+        (envelopeGate.envelopeState == EnvelopeGate::ENVELOPESTATE_OFF ? 0 :  oscillator.currentPhase);
+    
+    oscillator.reset (frequency, initialPhase);
+
+    envelopeGate.triggerEnvelope (true, true);
+
+    amplitudeOfPlayingNote = 0.6f + 0.4f * velocity;
+    
+    // for now, the LFO will be free running, so we won't restart it here.
+}
+
+
+// 2) generate sample
 float SimpleMonoSynth::generateSample()
 {
     float unscaledSample = oscillator.generateSample();
-    // float amplitude = (1.0f  - lfo.generateSample()
-    // TODO hier weitermachen
+    float envelopeGateScaling = envelopeGate.computeNextEnvelopeGateSample();
+    float lfoSample = lfo.generateSample();
+    
+    float lfoAmplitudeScaling = 1.0f - amountOfLfoLevelModulation
+                                + (amountOfLfoLevelModulation * (0.5f + 0.5f * lfoSample));
+
+    return amplitudeOfPlayingNote 
+           * envelopeGateScaling
+           * lfoAmplitudeScaling
+           * unscaledSample;
 }
 
 
