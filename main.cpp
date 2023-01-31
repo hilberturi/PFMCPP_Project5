@@ -1199,7 +1199,7 @@ int main()
 
         synth.triggerNote (true, midiNoteNumber, velocity, tuningInHz);
         
-        // we should see a full modulation cycle of the LFO:
+        // we should see 1/4th of the modulation cycle of the LFO:
         synth.dumpSamples (17);
         
         std::cout << std::endl;        
