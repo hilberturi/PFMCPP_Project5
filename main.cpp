@@ -990,8 +990,9 @@ float SimpleMonoSynth::generateSample()
     float envelopeGateScaling = envelopeGate.computeNextEnvelopeGateSample();
     float lfoSample = lfo.generateSample();
     
-    float lfoAmplitudeScaling = 1.0f - amountOfLfoLevelModulation
-                                + (amountOfLfoLevelModulation * (0.5f + 0.5f * lfoSample));
+    float lfoAmplitudeScaling = 1.0f 
+                                - amountOfLfoLevelModulation
+                                + amountOfLfoLevelModulation * (0.5f + 0.5f * lfoSample);
 
     return amplitudeOfPlayingNote 
            * envelopeGateScaling
@@ -1185,21 +1186,21 @@ int main()
 
         std::cout << std::endl 
                   << std::endl
-                  << "dump SimpleMonoSynth output with gate at 1, full LFO amount" 
+                  << "dump SimpleMonoSynth output, gate at 1, full LFO amount, 1/4 LFO cycle" 
                   << std::endl;
         
         synth.envelopeGate
              .envelopeParameters
              .adjustParameters (0, 0, 1, 0);
 
-        double lfoSpeedInHz = 16 / sampleRateInHz;        
+        double lfoSpeedInHz = sampleRateInHz / 64;        
         synth.lfo.reset (lfoSpeedInHz);        
         synth.amountOfLfoLevelModulation = 1;
 
         synth.triggerNote (true, midiNoteNumber, velocity, tuningInHz);
         
         // we should see a full modulation cycle of the LFO:
-        synth.dumpSamples(17);
+        synth.dumpSamples (17);
         
         std::cout << std::endl;        
 
