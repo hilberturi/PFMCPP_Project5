@@ -932,11 +932,11 @@ struct SimpleMonoSynth
     float amplitudeOfPlayingNote {1};
     // Things it can do:
     //   1) trigger a note given midi pitch, velocity in 0..1. Trigger again with keyPressed = false for release of key.
-    void triggerNote (int midiNoteNumber, float velocity = 1, bool keyPressed = true, double tuningInHz = 440);
+    void triggerNote (bool keyPressed = true, int midiNoteNumber = 34, float velocity = 1, double tuningInHz = 440);
     //   2) generate sample
     float generateSample();
-    //   3) dump given number of samples on console 
-    void dumpSamples (int numSamplesTotal, int numSamplesKeyPressed, int maxStepsAllowed = 500);
+    //   3) dump given number of samples on console. Shown step numbers can be shifted by offset.
+    void dumpSamples (int numSteps, int firstStepOffset = 0);
 };
 
 ///////////////////////////////////////////////////////
@@ -954,7 +954,7 @@ SimpleMonoSynth::~SimpleMonoSynth()
 }
 
 // 1) trigger a note given midi pitch, velocity in 0..1. Trigger again with keyPressed = false for release of key.
-void SimpleMonoSynth::triggerNote (int midiNoteNumber, float velocity, bool keyPressed, 
+void SimpleMonoSynth::triggerNote (bool keyPressed, int midiNoteNumber, float velocity,  
                                    double tuningInHz)
 {
     if (! keyPressed)
@@ -1000,10 +1000,17 @@ float SimpleMonoSynth::generateSample()
 }
 
 
-// 2) dump given number of samples on console 
-void SimpleMonoSynth::dumpSamples (int numSamplesTotal, int numSamplesKeyPressed, int maxStepsAllowed)
+// 3) dump given number of samples on console. Shown step numbers can be shifted by offset.
+void SimpleMonoSynth::dumpSamples (int numSteps, int firstStepOffset)
 {
+    int stepLimit = numSteps + firstStepOffset;
     
+    for (int i = firstStepOffset; i < stepLimit; ++i)
+    {
+        std::cout << "step [" << i << "] "
+                  << "=> sample [" << generateSample() << "]"
+                  << std::endl;
+    }
 }
         
 /*
@@ -1115,6 +1122,87 @@ int main()
     
         std::cout << std::endl;    
     }
-    
+
+    {
+        // block for testing UDT5: SimpleMonoSynth
+
+        std::cout << std::endl;        
+
+        double sampleRateInHz {44100};
+        
+        SimpleMonoSynth synth {sampleRateInHz};
+
+        // in order to make visible if the LFO and the gate work,
+        // I trigger a very high note at 11025 Hz that has 4 samples
+        // 0, 1, 0, -1 per cycle.
+        // so we can see in the output what happens to the 
+        // amplitudes in each cycle of 4 samples.
+        
+        int midiNoteNumber = 34;
+        double tuningInHz = sampleRateInHz / 4;
+        float velocity = 1;
+
+        // we start with showing the effect of the gate
+        // by demonstrating the Attack, Decay, Sustain and Release.
+        // The modulation amount of the LFO will be set to 0
+        // and we will use full velocity (amplitude 1)
+        // so that we only see the effect of the envelope gate:
+
+        synth.amountOfLfoLevelModulation = 0;
+
+        double attackTimeInSeconds = 4 / sampleRateInHz;
+        double decayTimeInSeconds = 4 / sampleRateInHz; 
+        float sustainLevel = 0.5f;
+        double releaseTimeInSeconds = 4 / sampleRateInHz;
+        
+        synth.envelopeGate
+             .envelopeParameters
+             .adjustParameters (attackTimeInSeconds, decayTimeInSeconds, 
+                                sustainLevel, releaseTimeInSeconds);
+
+        std::cout << std::endl 
+                  << "dump SimpleMonoSynth output in ADSR phases, no LFO" 
+                  << std::endl;
+        
+        synth.triggerNote (true, midiNoteNumber, velocity, tuningInHz);
+        
+        // we should see 4 samples in attack phase, in decay phase, and in sustain phase each:
+        synth.dumpSamples(12);
+        
+        // start the release phase and show 4 samples:
+        
+        synth.triggerNote (false);
+
+        std::cout << "*note off has occurred*" << std::endl;
+
+        synth.dumpSamples(4, 12);
+
+        // finally let's demonstrate the effect of the LFO.
+
+        std::cout << std::endl;
+
+        synth = SimpleMonoSynth(sampleRateInHz);
+
+        std::cout << std::endl 
+                  << std::endl
+                  << "dump SimpleMonoSynth output with gate at 1, full LFO amount" 
+                  << std::endl;
+        
+        synth.envelopeGate
+             .envelopeParameters
+             .adjustParameters (0, 0, 1, 0);
+
+        double lfoSpeedInHz = 16 / sampleRateInHz;        
+        synth.lfo.reset (lfoSpeedInHz);        
+        synth.amountOfLfoLevelModulation = 1;
+
+        synth.triggerNote (true, midiNoteNumber, velocity, tuningInHz);
+        
+        // we should see a full modulation cycle of the LFO:
+        synth.dumpSamples(17);
+        
+        std::cout << std::endl;        
+
+    }
     std::cout << "good to go!" << std::endl;
 }
