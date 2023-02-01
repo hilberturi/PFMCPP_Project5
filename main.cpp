@@ -492,10 +492,8 @@ bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
             
             if (releaseTimeInSamples > 0)
             {
-                double normalizedDelta = 
-                    static_cast<double>(-lastComputedNormalizedSample);
-                normalizedDeltaPerStep = 
-                    static_cast<float> (normalizedDelta / releaseTimeInSamples);
+                double normalizedDelta = static_cast<double>(-lastComputedNormalizedSample);
+                normalizedDeltaPerStep = static_cast<float>(normalizedDelta / releaseTimeInSamples);
             }
             else
             {
@@ -929,7 +927,7 @@ struct SimpleMonoSynth
     float amplitudeOfPlayingNote {1};
     // Things it can do:
     //   1) trigger a note given midi pitch, velocity in 0..1. Trigger again with keyPressed = false for release of key.
-    void triggerNote (bool keyPressed = true, int midiNoteNumber = 34, float velocity = 1, double tuningInHz = 440);
+    void triggerNote (bool keyPressed = true, int midiNoteNumber = 69, float velocity = 1, double tuningInHz = 440);
     //   2) generate sample
     float generateSample();
     //   3) dump given number of samples on console. Shown step numbers can be shifted by offset.
@@ -962,8 +960,8 @@ void SimpleMonoSynth::triggerNote (bool keyPressed, int midiNoteNumber, float ve
     }
     // { keyPressed == true }
     
-    // assuming that MIDI note number 34 corresponds to A4 concert pitch (usually 440 Hz):
-    float frequency = static_cast<float> (tuningInHz * pow (2, (midiNoteNumber - 34) / 12.0));
+    // assuming that MIDI note number 69 corresponds to A4 concert pitch (usually 440 Hz):
+    float frequency = static_cast<float> (tuningInHz * pow (2, (midiNoteNumber - 69) / 12.0));
 
     // avoid clicks for frequency change by keeping phase for currently playing note if we retrigger 
     // with a new note:
@@ -1136,7 +1134,7 @@ int main()
         // so we can see in the output what happens to the 
         // amplitudes in each cycle of 4 samples.
         
-        int midiNoteNumber = 34;
+        int midiNoteNumber = 69;
         double tuningInHz = sampleRateInHz / 4;
         float velocity = 1;
 
