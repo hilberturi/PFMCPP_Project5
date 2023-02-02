@@ -885,7 +885,12 @@ struct LowFrequencyOscillator
     //    3) dump LFO output to console
     void dumpToConsole (int totalNumSamples, int displayEveryNthStep = 1);
 
-    // new 
+    // print functions for members, Part 2
+    void printSampleRateInHz(std::string prefix = "this->");
+    void printPhaseIncrementPerStep(std::string prefix = "this->");
+    void printAmplitudeDeltaPerStep(std::string prefix = "this->");
+    void printCurrentPhase(std::string prefix = "this->");
+    void printCurrentAmplitude(std::string prefix = "this->");
 };
 
 ///////////////////////////////////////////////////////
@@ -959,6 +964,32 @@ void LowFrequencyOscillator::dumpToConsole (int totalNumSamples,
                       << std::endl;
         }
     }
+}
+
+// print functions for members, Part 2
+void LowFrequencyOscillator::printSampleRateInHz(std::string prefix)
+{
+    std::cout << prefix << "sampleRateInHz: " << this->sampleRateInHz << std::endl;
+}
+
+void LowFrequencyOscillator::printPhaseIncrementPerStep(std::string prefix)
+{
+    std::cout << prefix << "phaseIncremenPerStep: " << this->phaseIncrementPerStep << std::endl;
+}
+
+void LowFrequencyOscillator::printAmplitudeDeltaPerStep(std::string prefix)
+{
+    std::cout << prefix << "amplitudeDeltaPerStep: " << this->amplitudeDeltaPerStep << std::endl;
+}
+
+void LowFrequencyOscillator::printCurrentPhase(std::string prefix)
+{
+    std::cout << prefix << "currentPhase: " << this->currentPhase << std::endl;
+}
+
+void LowFrequencyOscillator::printCurrentAmplitude(std::string prefix)
+{
+    std::cout << prefix << "currentAmplitude: " << this->currentAmplitude << std::endl;
 }
 
 
@@ -1481,11 +1512,16 @@ int main()
 
         std::string lfoPrefix {"lfo."};
 
-        std::cout << lfoPrefix << "sampleRateInHz: " << lfo.sampleRateInHz << std::endl;        
+        std::cout << lfoPrefix << "sampleRateInHz: " << lfo.sampleRateInHz << std::endl; 
+        lfo.printSampleRateInHz (lfoPrefix);
         std::cout << lfoPrefix << "phaseIncrementPerStep: " << lfo.phaseIncrementPerStep << std::endl;        
+        lfo.printPhaseIncrementPerStep (lfoPrefix);
         std::cout << lfoPrefix << "amplitudeDeltaPerStep: " << lfo.amplitudeDeltaPerStep << std::endl;        
+        lfo.printAmplitudeDeltaPerStep (lfoPrefix);
         std::cout << lfoPrefix << "currentPhase: " << lfo.currentPhase << std::endl;        
+        lfo.printCurrentPhase (lfoPrefix);
         std::cout << lfoPrefix << "currentAmplitude: " << lfo.currentAmplitude << std::endl;        
+        lfo.printCurrentAmplitude (lfoPrefix);
 
         std::cout << std::endl;        
     }
