@@ -114,7 +114,14 @@ struct Oscillator
 
         // I need an internal helper function, 0 <= sampleIndex < numSupportPoints
         float getSampleAtIndex (int sampleIndex);
-    };
+
+        // print functions for members, Part 2
+        void printName(std::string prefix = "this->");
+        void printInterpolationType(std::string prefix = "this->");
+        void printNumSupportPoints(std::string prefix = "this->");
+        void printPhaseIncrement(std::string prefix = "this->");
+        void printFlipPolarity(std::string prefix = "this->");
+};
 
     Oscillator (std::string oscillatorId, float sampleRate = 44100);
     ~Oscillator();
@@ -140,6 +147,13 @@ struct Oscillator
 
     //     3) dump a given number of samples to console Samples (optionally without changing internal state)
     void dumpSamples (int numSamples, bool restoreCurrentPhase = false);
+
+    // print functions for members, Part 2
+    void printOscillatorId(std::string prefix = "this->");
+    void printSampleRate(std::string prefix = "this->");
+    void printAngularVelocity(std::string prefix = "this->");
+    void printCurrentPhase(std::string prefix = "this->");
+    void printWaveform(std::string prefix = "this->");
 };
 
 // Implementation of nested UDT Oscillator::SingleCycleWaveform:
@@ -246,6 +260,33 @@ float Oscillator::SingleCycleWaveform::getSampleAtIndex (int sampleIndex)
     return (flipPolarity ? -rawSampleAtIndex : rawSampleAtIndex);
 }
 
+void Oscillator::SingleCycleWaveform::printName(std::string prefix)
+{
+    std::cout << prefix << "name: " << this->name << std::endl;
+}
+
+void Oscillator::SingleCycleWaveform::printInterpolationType(std::string prefix)
+{
+    std::cout << prefix << "interpolationType: " << this->interpolationType << std::endl;
+}
+
+void Oscillator::SingleCycleWaveform::printNumSupportPoints(std::string prefix)
+{
+    std::cout << prefix << "numSupportPoints: " << this->numSupportPoints << std::endl;
+}
+
+void Oscillator::SingleCycleWaveform::printPhaseIncrement(std::string prefix)
+{
+    std::cout << prefix << "phaseIncrement: " << this->phaseIncrement << std::endl;
+}
+
+void Oscillator::SingleCycleWaveform::printFlipPolarity(std::string prefix)
+{
+    std::cout << prefix << "flipPolarity: " << this->flipPolarity << std::endl;
+}
+
+
+
 // Implementation of struct Oscillator
 
 Oscillator::Oscillator (std::string id, float rate)
@@ -303,6 +344,38 @@ void Oscillator::dumpSamples (int numSamples, bool restoreCurrentPhase)
         currentPhase = currentPhaseBeforeDumpSamples;
     }
 }
+
+void Oscillator::printOscillatorId(std::string prefix)
+{
+    std::cout << prefix << "oscillatorId: " << this->oscillatorId << std::endl;
+}
+
+void Oscillator::printSampleRate(std::string prefix)
+{
+    std::cout << prefix << "sampleRate: " << this->sampleRate << std::endl;
+}
+
+void Oscillator::printAngularVelocity(std::string prefix)
+{
+    std::cout << prefix << "angularVelocity: " << this->angularVelocity << std::endl;
+}
+
+void Oscillator::printCurrentPhase(std::string prefix)
+{
+    std::cout << prefix << "currentPhase: " << this->currentPhase << std::endl;
+}
+
+void Oscillator::printWaveform(std::string prefix)
+{
+    std::string wavePrefix = {prefix + "waveform."};
+    
+    std::cout << wavePrefix << "name: " << this->waveform.name << std::endl;
+    std::cout << wavePrefix << "interpolationType: " << this->waveform.interpolationType << std::endl;
+    std::cout << wavePrefix << "numSupportPoints: " << this->waveform.numSupportPoints << std::endl;
+    std::cout << wavePrefix << "phaseIncrement: " << this->waveform.phaseIncrement << std::endl;
+    std::cout << wavePrefix << "flipPolarity: " << this->waveform.flipPolarity << std::endl;
+}
+
 
 
 /*
@@ -1233,15 +1306,24 @@ int main()
 
         std::cout << std::endl;
         
-        std::cout << oscPrefix << "oscillatorId: " << osc.oscillatorId << std::endl;        
+        std::cout << oscPrefix << "oscillatorId: " << osc.oscillatorId << std::endl; 
+        osc.printOscillatorId(oscPrefix);
         std::cout << oscPrefix << "sampleRate: " << osc.sampleRate << std::endl;
+        osc.printSampleRate(oscPrefix);
         std::cout << oscPrefix << "angularVelocity: " << osc.angularVelocity << std::endl;
+        osc.printAngularVelocity(oscPrefix);
         std::cout << oscPrefix << "currentPhase: " << osc.currentPhase << std::endl;
+        osc.printCurrentPhase(oscPrefix);
         std::cout << wavePrefix << "name: " << osc.waveform.name << std::endl;
+        osc.waveform.printName(wavePrefix);
         std::cout << wavePrefix << "interpolationType: " << osc.waveform.interpolationType << std::endl;
+        osc.waveform.printInterpolationType(wavePrefix);
         std::cout << wavePrefix << "numSupportPoints: " << osc.waveform.numSupportPoints << std::endl;
+        osc.waveform.printNumSupportPoints(wavePrefix);
         std::cout << wavePrefix << "phaseIncrement: " << osc.waveform.phaseIncrement << std::endl;
+        osc.waveform.printPhaseIncrement(wavePrefix);
         std::cout << wavePrefix << "flipPolarity: " << osc.waveform.flipPolarity << std::endl;
+        osc.waveform.printFlipPolarity(wavePrefix);
         
         std::cout << std::endl;
     }
