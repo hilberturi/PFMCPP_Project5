@@ -733,6 +733,8 @@ struct LowFrequencyOscillator
 
     //    3) dump LFO output to console
     void dumpToConsole (int totalNumSamples, int displayEveryNthStep = 1);
+
+    // new 
 };
 
 ///////////////////////////////////////////////////////
@@ -1023,8 +1025,13 @@ void SimpleMonoSynth::dumpSamples (int numSteps, int firstStepOffset)
  Wait for my code review.
  */
 
-int main()
-{
+/*
+ show lists of generated samples for UDTs 1-2 given a configuration
+ that makes it easy to judge if the implementation works.
+ Extracted from main Part1 since I want main to only print
+ UDT members.
+*/
+void dumpUDTBehaviour() {
     {
         // block for testing UDT1: Oscillator and nested UDT SingleCycleWaveform
         
@@ -1199,6 +1206,255 @@ int main()
         
         std::cout << std::endl;        
 
+    }    
+}
+
+int main()
+{
+    bool showUDTBehavior = false;
+    
+    if (showUDTBehavior)
+    {
+        // outputs as they looked like in Part1
+        dumpUDTBehaviour();
+    }
+
+    // print members from here and from member functions
+    // solution for Part2
+    
+    {
+        // block for testing UDT1: Oscillator and nested UDT SingleCycleWaveform
+        
+        std::string oscPrefix {"oscillator."};
+        std::string wavePrefix {oscPrefix + "waveform."};
+        
+        Oscillator osc {"osc1"};
+        osc.reset (4410);
+
+        std::cout << std::endl;
+        
+        std::cout << oscPrefix << "oscillatorId: " << osc.oscillatorId << std::endl;        
+        std::cout << oscPrefix << "sampleRate: " << osc.sampleRate << std::endl;
+        std::cout << oscPrefix << "angularVelocity: " << osc.angularVelocity << std::endl;
+        std::cout << oscPrefix << "currentPhase: " << osc.currentPhase << std::endl;
+        std::cout << wavePrefix << "name: " << osc.waveform.name << std::endl;
+        std::cout << wavePrefix << "interpolationType: " << osc.waveform.interpolationType << std::endl;
+        std::cout << wavePrefix << "numSupportPoints: " << osc.waveform.numSupportPoints << std::endl;
+        std::cout << wavePrefix << "phaseIncrement: " << osc.waveform.phaseIncrement << std::endl;
+        std::cout << wavePrefix << "flipPolarity: " << osc.waveform.flipPolarity << std::endl;
+        
+        std::cout << std::endl;
+    }
+        
+    {
+        // block for testing UDT2: EnvelopeGate and nested EnvelopeParameters
+
+        std::cout << std::endl;
+        
+        EnvelopeGate envelopeGate {};
+
+        double attackTimeInSeconds  = 0.005;
+        double decayTimeInSeconds   = 0.010;
+        double releaseTimeInSeconds = 0.015;
+        float sustainLevel = 0.5;
+        double midValuePoint = 0.7;
+
+        envelopeGate.envelopeParameters
+                    .adjustParameters (attackTimeInSeconds, 
+                                       decayTimeInSeconds, 
+                                       sustainLevel, 
+                                       releaseTimeInSeconds, 
+                                       midValuePoint);
+        
+        envelopeGate.triggerEnvelope (true);
+
+        std::cout << std::endl;
+
+        std::string egPrefix {"envelopeGate."};
+        std::string paramsPrefix {egPrefix + "envelopeParameters."};
+        
+        std::cout << egPrefix << "envelopeState: " 
+                  << envelopeGate.envelopeState << std::endl;        
+        std::cout << egPrefix << "normalizedTargetValueInCurrentState: " 
+                  << envelopeGate.normalizedTargetValueInCurrentState << std::endl;        
+        std::cout << egPrefix << "normalizedDeltaPerStep: " 
+                  << envelopeGate.normalizedDeltaPerStep << std::endl;        
+        std::cout << egPrefix << "lastComputedNormalizedSample: " 
+                  << envelopeGate.lastComputedNormalizedSample << std::endl;    
+        std::cout << paramsPrefix << "attackTimeInSamples: " 
+                  << envelopeGate.envelopeParameters.attackTimeInSamples << std::endl;        
+        std::cout << paramsPrefix << "decayTimeInSamples: " 
+                  << envelopeGate.envelopeParameters.decayTimeInSamples << std::endl;        
+        std::cout << paramsPrefix << "normalizedSustainLevel: " 
+                  << envelopeGate.envelopeParameters.normalizedSustainLevel << std::endl;        
+        std::cout << paramsPrefix << "releaseTimeInSamples: " 
+                  << envelopeGate.envelopeParameters.releaseTimeInSamples << std::endl;        
+        std::cout << paramsPrefix << "exponentOfShapePowerFunction: " 
+                  << envelopeGate.envelopeParameters.exponentOfShapePowerFunction << std::endl;        
+        
+        std::cout << std::endl;        
+    }
+
+    {
+        // block for testing UDT3: LowFrequencyOscillator (no nested type)
+
+        std::cout << std::endl;        
+
+        LowFrequencyOscillator lfo {44100};
+
+        double speedInHz = 1; 
+        double initialPhase = 0; 
+        double riseTimeInSeconds = 1;
+        
+        lfo.reset (speedInHz, initialPhase, riseTimeInSeconds);
+                
+        std::cout << std::endl;        
+
+        std::string lfoPrefix {"lfo."};
+
+        std::cout << lfoPrefix << "sampleRateInHz: " << lfo.sampleRateInHz << std::endl;        
+        std::cout << lfoPrefix << "phaseIncrementPerStep: " << lfo.phaseIncrementPerStep << std::endl;        
+        std::cout << lfoPrefix << "amplitudeDeltaPerStep: " << lfo.amplitudeDeltaPerStep << std::endl;        
+        std::cout << lfoPrefix << "currentPhase: " << lfo.currentPhase << std::endl;        
+        std::cout << lfoPrefix << "currentAmplitude: " << lfo.currentAmplitude << std::endl;        
+
+        std::cout << std::endl;        
+    }
+
+    {
+        // block for testing UDT4: CompoundOscillator
+
+        std::cout << std::endl;        
+        
+        CompoundOscillator osc {44100};
+        osc.detuneInCent = 5;
+        osc.phaseOffsetOscillatorB = piTwiceFloat / 4.0f;
+        osc.reset (4410);
+
+        std::cout << std::endl;        
+
+        std::string oscPrefix {"compoundOsc."};
+        std::string oscAPrefix {oscPrefix + "oscA."};
+        std::string oscBPrefix {oscPrefix + "oscB."};
+        std::string waveAPrefix {oscAPrefix + "waveform."};
+        std::string waveBPrefix {oscBPrefix + "waveform."};
+
+        std::cout << oscPrefix << "balance: " << osc.balance << std::endl;        
+        std::cout << oscPrefix << "detuneInCent: " << osc.detuneInCent << std::endl;        
+        std::cout << oscPrefix << "phaseOffsetOscillatorB: " << osc.phaseOffsetOscillatorB << std::endl; 
+        
+        std::cout << oscAPrefix << "oscillatorId: " << osc.oscA.oscillatorId << std::endl;        
+        std::cout << oscAPrefix << "sampleRate: " << osc.oscA.sampleRate << std::endl;
+        std::cout << oscAPrefix << "angularVelocity: " << osc.oscA.angularVelocity << std::endl;
+        std::cout << oscAPrefix << "currentPhase: " << osc.oscA.currentPhase << std::endl;
+        std::cout << waveAPrefix << "name: " << osc.oscA.waveform.name << std::endl;
+        std::cout << waveAPrefix << "interpolationType: " << osc.oscA.waveform.interpolationType << std::endl;
+        std::cout << waveAPrefix << "numSupportPoints: " << osc.oscA.waveform.numSupportPoints << std::endl;
+        std::cout << waveAPrefix << "phaseIncrement: " << osc.oscA.waveform.phaseIncrement << std::endl;
+        std::cout << waveAPrefix << "flipPolarity: " << osc.oscA.waveform.flipPolarity << std::endl;
+
+        std::cout << oscBPrefix << "oscillatorId: " << osc.oscB.oscillatorId << std::endl;        
+        std::cout << oscBPrefix << "sampleRate: " << osc.oscB.sampleRate << std::endl;
+        std::cout << oscBPrefix << "angularVelocity: " << osc.oscB.angularVelocity << std::endl;
+        std::cout << oscBPrefix << "currentPhase: " << osc.oscB.currentPhase << std::endl;
+        std::cout << waveBPrefix << "name: " << osc.oscB.waveform.name << std::endl;
+        std::cout << waveBPrefix << "interpolationType: " << osc.oscB.waveform.interpolationType << std::endl;
+        std::cout << waveBPrefix << "numSupportPoints: " << osc.oscB.waveform.numSupportPoints << std::endl;
+        std::cout << waveBPrefix << "phaseIncrement: " << osc.oscB.waveform.phaseIncrement << std::endl;
+        std::cout << waveBPrefix << "flipPolarity: " << osc.oscB.waveform.flipPolarity << std::endl;
+        
+        std::cout << std::endl;    
+    }
+
+    {
+        // block for testing UDT5: SimpleMonoSynth
+
+        std::cout << std::endl;        
+        
+        SimpleMonoSynth synth {44100};
+        
+        int midiNoteNumber = 69;
+        double tuningInHz = 440;
+        float velocity = 0.8f;
+
+        synth.amountOfLfoLevelModulation = 0.5f;
+
+        double attackTimeInSeconds = 0.005;
+        double decayTimeInSeconds = 0.1; 
+        float sustainLevel = 0.4f;
+        double releaseTimeInSeconds = 0.8;
+        
+        synth.envelopeGate
+             .envelopeParameters
+             .adjustParameters (attackTimeInSeconds, decayTimeInSeconds, 
+                                sustainLevel, releaseTimeInSeconds);
+        
+        synth.triggerNote (true, midiNoteNumber, velocity, tuningInHz);
+                
+        std::cout << std::endl;        
+
+        std::string synthPrefix {"synth."};
+        std::string oscPrefix {synthPrefix + "oscillator."};
+        std::string wavePrefix {oscPrefix + "waveform."};        
+        std::string egPrefix {synthPrefix + "envelopeGate."};
+        std::string paramsPrefix {egPrefix + "envelopeParameters."};
+        std::string lfoPrefix {synthPrefix + "lfo."};
+
+        std::cout << synthPrefix << "amountOfLfoLevelModulation: " 
+                  << synth.amountOfLfoLevelModulation << std::endl;        
+        std::cout << synthPrefix << "amplitudeOfPlayingNote: " 
+                  << synth.amplitudeOfPlayingNote << std::endl; 
+        
+        std::cout << oscPrefix << "oscillatorId: " 
+                  << synth.oscillator.oscillatorId << std::endl;        
+        std::cout << oscPrefix << "sampleRate: " 
+                  << synth.oscillator.sampleRate << std::endl;
+        std::cout << oscPrefix << "angularVelocity: " 
+                  << synth.oscillator.angularVelocity << std::endl;
+        std::cout << oscPrefix << "currentPhase: " 
+                  << synth.oscillator.currentPhase << std::endl;
+        std::cout << wavePrefix << "name: " 
+                  << synth.oscillator.waveform.name << std::endl;
+        std::cout << wavePrefix << "interpolationType: " 
+                  << synth.oscillator.waveform.interpolationType << std::endl;
+        std::cout << wavePrefix << "numSupportPoints: " 
+                  << synth.oscillator.waveform.numSupportPoints << std::endl;
+        std::cout << wavePrefix << "phaseIncrement: " 
+                  << synth.oscillator.waveform.phaseIncrement << std::endl;
+        std::cout << wavePrefix << "flipPolarity: " 
+                  << synth.oscillator.waveform.flipPolarity << std::endl;
+
+        std::cout << egPrefix << "envelopeState: " 
+                  << synth.envelopeGate.envelopeState << std::endl;        
+        std::cout << egPrefix << "normalizedTargetValueInCurrentState: " 
+                  << synth.envelopeGate.normalizedTargetValueInCurrentState << std::endl;        
+        std::cout << egPrefix << "normalizedDeltaPerStep: " 
+                  << synth.envelopeGate.normalizedDeltaPerStep << std::endl;        
+        std::cout << egPrefix << "lastComputedNormalizedSample: " 
+                  << synth.envelopeGate.lastComputedNormalizedSample << std::endl;    
+        std::cout << paramsPrefix << "attackTimeInSamples: " 
+                  << synth.envelopeGate.envelopeParameters.attackTimeInSamples << std::endl;        
+        std::cout << paramsPrefix << "decayTimeInSamples: " 
+                  << synth.envelopeGate.envelopeParameters.decayTimeInSamples << std::endl;        
+        std::cout << paramsPrefix << "normalizedSustainLevel: " 
+                  << synth.envelopeGate.envelopeParameters.normalizedSustainLevel << std::endl;        
+        std::cout << paramsPrefix << "releaseTimeInSamples: " 
+                  << synth.envelopeGate.envelopeParameters.releaseTimeInSamples << std::endl;        
+        std::cout << paramsPrefix << "exponentOfShapePowerFunction: " 
+                  << synth.envelopeGate.envelopeParameters.exponentOfShapePowerFunction << std::endl;        
+
+        std::cout << lfoPrefix << "sampleRateInHz: " 
+                  << synth.lfo.sampleRateInHz << std::endl;        
+        std::cout << lfoPrefix << "phaseIncrementPerStep: " 
+                  << synth.lfo.phaseIncrementPerStep << std::endl;        
+        std::cout << lfoPrefix << "amplitudeDeltaPerStep: " 
+                  << synth.lfo.amplitudeDeltaPerStep << std::endl;        
+        std::cout << lfoPrefix << "currentPhase: " 
+                  << synth.lfo.currentPhase << std::endl;        
+        std::cout << lfoPrefix << "currentAmplitude: " 
+                  << synth.lfo.currentAmplitude << std::endl;        
+
+        std::cout << std::endl;    
     }
     std::cout << "good to go!" << std::endl;
 }
