@@ -423,6 +423,14 @@ struct EnvelopeGate
 
         //     3) something that requires a loop => dump shape
         void dumpShape (int numberOfSteps = 11);
+
+        // print functions for members, Part 2
+        void printAttackTimeInSamples(std::string prefix = "this->");
+        void printDecayTimeInSamples(std::string prefix = "this->");
+        void printNormalizedSustainLevel(std::string prefix = "this->");
+        void printReleaseTimeInSamples(std::string prefix = "this->");
+        void printExponentOfShapePowerFunction(std::string prefix = "this->");
+
     };
 
     // enclosing UDT2: EnvelopeGate
@@ -452,6 +460,13 @@ struct EnvelopeGate
 
     //     3) dump envelope gate response, assuming that the key is being pressed for numSamplesKeyPressed
     void dumpEnvelopeGateResponse (int numSamplesKeyPressed, int displayEveryNthStep = 1, int maxStepsAllowed = 1000000);
+
+    // print functions for members, Part 2
+    void printEnvelopeState(std::string prefix = "this->");
+    void printNormalizedTargetValueInCurrentState(std::string prefix = "this->");
+    void printNormalizedDeltaPerStep(std::string prefix = "this->");
+    void printLastComputedNormalizedSample(std::string prefix = "this->");
+    void printEnvelopeParameters(std::string prefix = "this->");
 };
 
 
@@ -532,6 +547,32 @@ void EnvelopeGate::EnvelopeParameters
                      "=> transformed value [" << transformedValue << "]" 
                   << std::endl;
     }
+}
+
+// print functions for members, Part 2
+void EnvelopeGate::EnvelopeParameters::printAttackTimeInSamples(std::string prefix)
+{
+    std::cout << prefix << "attackTimeInSamples: " << this->attackTimeInSamples << std::endl;
+}
+
+void EnvelopeGate::EnvelopeParameters::printDecayTimeInSamples(std::string prefix)
+{
+    std::cout << prefix << "decayTimeInSamples: " << this->decayTimeInSamples << std::endl;
+}
+
+void EnvelopeGate::EnvelopeParameters::printNormalizedSustainLevel(std::string prefix)
+{
+    std::cout << prefix << "normalizedSustainLevel: " << this->normalizedSustainLevel << std::endl;
+}
+
+void EnvelopeGate::EnvelopeParameters::printReleaseTimeInSamples(std::string prefix)
+{
+    std::cout << prefix << "releaseTimeInSamples: " << this->releaseTimeInSamples << std::endl;
+}
+
+void EnvelopeGate::EnvelopeParameters::printExponentOfShapePowerFunction(std::string prefix)
+{
+    std::cout << prefix << "exponentOfShapePowerFunction: " << this->exponentOfShapePowerFunction << std::endl;
 }
 
 
@@ -773,6 +814,43 @@ void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
     }
 }
 
+
+// print functions for members, Part 2
+void EnvelopeGate::printEnvelopeState(std::string prefix)
+{
+    std::cout << prefix << "envelopeState: " << this->envelopeState << std::endl;
+}
+
+void EnvelopeGate::printNormalizedTargetValueInCurrentState(std::string prefix)
+{
+    std::cout << prefix << "normalizedTargetValueInCurrentState: " << this->normalizedTargetValueInCurrentState << std::endl;
+}
+
+void EnvelopeGate::printNormalizedDeltaPerStep(std::string prefix)
+{
+    std::cout << prefix << "normalizedDeltaPerStep: " << this->normalizedDeltaPerStep << std::endl;
+}
+
+void EnvelopeGate::printLastComputedNormalizedSample(std::string prefix)
+{
+    std::cout << prefix << "lastComputedNormalizedSample: " << this->lastComputedNormalizedSample << std::endl;
+}
+
+void EnvelopeGate::printEnvelopeParameters(std::string prefix)
+{
+    std::string paramsPrefix {prefix + "envelopeParameters."};    
+    
+    std::cout << paramsPrefix << "attackTimeInSamples: " 
+              << this->envelopeParameters.attackTimeInSamples << std::endl;        
+    std::cout << paramsPrefix << "decayTimeInSamples: " 
+              << this->envelopeParameters.decayTimeInSamples << std::endl;        
+    std::cout << paramsPrefix << "normalizedSustainLevel: " 
+              << this->envelopeParameters.normalizedSustainLevel << std::endl;        
+    std::cout << paramsPrefix << "releaseTimeInSamples: " 
+              << this->envelopeParameters.releaseTimeInSamples << std::endl;        
+    std::cout << paramsPrefix << "exponentOfShapePowerFunction: " 
+              << this->envelopeParameters.exponentOfShapePowerFunction << std::endl;        
+}
 
 
 
@@ -1307,23 +1385,23 @@ int main()
         std::cout << std::endl;
         
         std::cout << oscPrefix << "oscillatorId: " << osc.oscillatorId << std::endl; 
-        osc.printOscillatorId(oscPrefix);
+        osc.printOscillatorId (oscPrefix);
         std::cout << oscPrefix << "sampleRate: " << osc.sampleRate << std::endl;
-        osc.printSampleRate(oscPrefix);
+        osc.printSampleRate (oscPrefix);
         std::cout << oscPrefix << "angularVelocity: " << osc.angularVelocity << std::endl;
-        osc.printAngularVelocity(oscPrefix);
+        osc.printAngularVelocity (oscPrefix);
         std::cout << oscPrefix << "currentPhase: " << osc.currentPhase << std::endl;
-        osc.printCurrentPhase(oscPrefix);
+        osc.printCurrentPhase (oscPrefix);
         std::cout << wavePrefix << "name: " << osc.waveform.name << std::endl;
-        osc.waveform.printName(wavePrefix);
+        osc.waveform.printName (wavePrefix);
         std::cout << wavePrefix << "interpolationType: " << osc.waveform.interpolationType << std::endl;
-        osc.waveform.printInterpolationType(wavePrefix);
+        osc.waveform.printInterpolationType (wavePrefix);
         std::cout << wavePrefix << "numSupportPoints: " << osc.waveform.numSupportPoints << std::endl;
-        osc.waveform.printNumSupportPoints(wavePrefix);
+        osc.waveform.printNumSupportPoints (wavePrefix);
         std::cout << wavePrefix << "phaseIncrement: " << osc.waveform.phaseIncrement << std::endl;
-        osc.waveform.printPhaseIncrement(wavePrefix);
+        osc.waveform.printPhaseIncrement (wavePrefix);
         std::cout << wavePrefix << "flipPolarity: " << osc.waveform.flipPolarity << std::endl;
-        osc.waveform.printFlipPolarity(wavePrefix);
+        osc.waveform.printFlipPolarity (wavePrefix);
         
         std::cout << std::endl;
     }
@@ -1356,23 +1434,32 @@ int main()
         std::string paramsPrefix {egPrefix + "envelopeParameters."};
         
         std::cout << egPrefix << "envelopeState: " 
-                  << envelopeGate.envelopeState << std::endl;        
+                  << envelopeGate.envelopeState << std::endl;
+        envelopeGate.printEnvelopeState (egPrefix);
         std::cout << egPrefix << "normalizedTargetValueInCurrentState: " 
                   << envelopeGate.normalizedTargetValueInCurrentState << std::endl;        
+        envelopeGate.printNormalizedTargetValueInCurrentState (egPrefix);    
         std::cout << egPrefix << "normalizedDeltaPerStep: " 
                   << envelopeGate.normalizedDeltaPerStep << std::endl;        
+        envelopeGate.printNormalizedDeltaPerStep(egPrefix);    
         std::cout << egPrefix << "lastComputedNormalizedSample: " 
                   << envelopeGate.lastComputedNormalizedSample << std::endl;    
+        envelopeGate.printLastComputedNormalizedSample (egPrefix);    
         std::cout << paramsPrefix << "attackTimeInSamples: " 
                   << envelopeGate.envelopeParameters.attackTimeInSamples << std::endl;        
+        envelopeGate.envelopeParameters.printAttackTimeInSamples (paramsPrefix);    
         std::cout << paramsPrefix << "decayTimeInSamples: " 
                   << envelopeGate.envelopeParameters.decayTimeInSamples << std::endl;        
+        envelopeGate.envelopeParameters.printDecayTimeInSamples (paramsPrefix);    
         std::cout << paramsPrefix << "normalizedSustainLevel: " 
                   << envelopeGate.envelopeParameters.normalizedSustainLevel << std::endl;        
+        envelopeGate.envelopeParameters.printNormalizedSustainLevel (paramsPrefix);    
         std::cout << paramsPrefix << "releaseTimeInSamples: " 
                   << envelopeGate.envelopeParameters.releaseTimeInSamples << std::endl;        
+        envelopeGate.envelopeParameters.printReleaseTimeInSamples (paramsPrefix);    
         std::cout << paramsPrefix << "exponentOfShapePowerFunction: " 
                   << envelopeGate.envelopeParameters.exponentOfShapePowerFunction << std::endl;        
+        envelopeGate.envelopeParameters.printExponentOfShapePowerFunction(paramsPrefix);    
         
         std::cout << std::endl;        
     }
