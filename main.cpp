@@ -121,6 +121,8 @@ struct Oscillator
         void printNumSupportPoints(std::string prefix = "this->");
         void printPhaseIncrement(std::string prefix = "this->");
         void printFlipPolarity(std::string prefix = "this->");
+        void printWaveform(std::string prefix = "this->");
+        void printOscillator(std::string prefix = "this->");
 };
 
     Oscillator (std::string oscillatorId, float sampleRate = 44100);
@@ -154,6 +156,7 @@ struct Oscillator
     void printAngularVelocity(std::string prefix = "this->");
     void printCurrentPhase(std::string prefix = "this->");
     void printWaveform(std::string prefix = "this->");
+
 };
 
 // Implementation of nested UDT Oscillator::SingleCycleWaveform:
@@ -285,7 +288,14 @@ void Oscillator::SingleCycleWaveform::printFlipPolarity(std::string prefix)
     std::cout << prefix << "flipPolarity: " << this->flipPolarity << std::endl;
 }
 
-
+void Oscillator::SingleCycleWaveform::printWaveform(std::string prefix)
+{
+    this->printName (prefix);
+    this->printInterpolationType (prefix);
+    this->printNumSupportPoints (prefix);
+    this->printPhaseIncrement (prefix);
+    this->printFlipPolarity (prefix);
+}
 
 // Implementation of struct Oscillator
 
@@ -367,13 +377,7 @@ void Oscillator::printCurrentPhase(std::string prefix)
 
 void Oscillator::printWaveform(std::string prefix)
 {
-    std::string wavePrefix = {prefix + "waveform."};
-    
-    std::cout << wavePrefix << "name: " << this->waveform.name << std::endl;
-    std::cout << wavePrefix << "interpolationType: " << this->waveform.interpolationType << std::endl;
-    std::cout << wavePrefix << "numSupportPoints: " << this->waveform.numSupportPoints << std::endl;
-    std::cout << wavePrefix << "phaseIncrement: " << this->waveform.phaseIncrement << std::endl;
-    std::cout << wavePrefix << "flipPolarity: " << this->waveform.flipPolarity << std::endl;
+    this->waveform.printWaveform (prefix + "waveform.");
 }
 
 
@@ -430,7 +434,7 @@ struct EnvelopeGate
         void printNormalizedSustainLevel(std::string prefix = "this->");
         void printReleaseTimeInSamples(std::string prefix = "this->");
         void printExponentOfShapePowerFunction(std::string prefix = "this->");
-
+        void printEnvelopeParameters(std::string prefix = "this->");
     };
 
     // enclosing UDT2: EnvelopeGate
@@ -467,6 +471,7 @@ struct EnvelopeGate
     void printNormalizedDeltaPerStep(std::string prefix = "this->");
     void printLastComputedNormalizedSample(std::string prefix = "this->");
     void printEnvelopeParameters(std::string prefix = "this->");
+    void printEnvelopeGate(std::string prefix = "this->");
 };
 
 
@@ -575,6 +580,15 @@ void EnvelopeGate::EnvelopeParameters::printExponentOfShapePowerFunction(std::st
     std::cout << prefix << "exponentOfShapePowerFunction: " << this->exponentOfShapePowerFunction << std::endl;
 }
 
+void EnvelopeGate::EnvelopeParameters::printEnvelopeParameters(std::string prefix)
+{
+    std::string paramsPrefix {prefix + "envelopeParameters."};    
+    this->printAttackTimeInSamples (prefix);
+    this->printDecayTimeInSamples(prefix);
+    this->printNormalizedSustainLevel(prefix);
+    this->printReleaseTimeInSamples(prefix);
+    this->printExponentOfShapePowerFunction(prefix);
+}
 
 ///////////////////////////////////////////////////////
 // Implementation of main UDT2: EnvelopeGate:
@@ -823,7 +837,8 @@ void EnvelopeGate::printEnvelopeState(std::string prefix)
 
 void EnvelopeGate::printNormalizedTargetValueInCurrentState(std::string prefix)
 {
-    std::cout << prefix << "normalizedTargetValueInCurrentState: " << this->normalizedTargetValueInCurrentState << std::endl;
+    std::cout << prefix << "normalizedTargetValueInCurrentState: " 
+              << this->normalizedTargetValueInCurrentState << std::endl;
 }
 
 void EnvelopeGate::printNormalizedDeltaPerStep(std::string prefix)
@@ -838,20 +853,17 @@ void EnvelopeGate::printLastComputedNormalizedSample(std::string prefix)
 
 void EnvelopeGate::printEnvelopeParameters(std::string prefix)
 {
-    std::string paramsPrefix {prefix + "envelopeParameters."};    
-    
-    std::cout << paramsPrefix << "attackTimeInSamples: " 
-              << this->envelopeParameters.attackTimeInSamples << std::endl;        
-    std::cout << paramsPrefix << "decayTimeInSamples: " 
-              << this->envelopeParameters.decayTimeInSamples << std::endl;        
-    std::cout << paramsPrefix << "normalizedSustainLevel: " 
-              << this->envelopeParameters.normalizedSustainLevel << std::endl;        
-    std::cout << paramsPrefix << "releaseTimeInSamples: " 
-              << this->envelopeParameters.releaseTimeInSamples << std::endl;        
-    std::cout << paramsPrefix << "exponentOfShapePowerFunction: " 
-              << this->envelopeParameters.exponentOfShapePowerFunction << std::endl;        
+    this->envelopeParameters.printEnvelopeParameters (prefix + "envelopeParameters.");
 }
 
+void EnvelopeGate::printEnvelopeGate(std::string prefix)
+{
+    this->printEnvelopeState (prefix);
+    this->printNormalizedTargetValueInCurrentState (prefix);
+    this->printNormalizedDeltaPerStep (prefix);
+    this->printLastComputedNormalizedSample (prefix);
+    this->printEnvelopeParameters (prefix);
+}
 
 
 /*
@@ -891,6 +903,7 @@ struct LowFrequencyOscillator
     void printAmplitudeDeltaPerStep(std::string prefix = "this->");
     void printCurrentPhase(std::string prefix = "this->");
     void printCurrentAmplitude(std::string prefix = "this->");
+    void printLowFrequencyOscillator(std::string prefix = "this->");
 };
 
 ///////////////////////////////////////////////////////
@@ -992,6 +1005,15 @@ void LowFrequencyOscillator::printCurrentAmplitude(std::string prefix)
     std::cout << prefix << "currentAmplitude: " << this->currentAmplitude << std::endl;
 }
 
+void LowFrequencyOscillator::printLowFrequencyOscillator(std::string prefix)
+{
+    this->printSampleRateInHz (prefix);
+    this->printPhaseIncrementPerStep (prefix);
+    this->printAmplitudeDeltaPerStep (prefix);
+    this->printCurrentPhase (prefix);
+    this->printCurrentAmplitude (prefix);
+}
+
 
 /*
  new UDT 4: CompoundOscillator
@@ -1028,7 +1050,6 @@ struct CompoundOscillator
     void printPhaseOffsetOscillatorB(std::string prefix = "this->");
     void printOscA(std::string prefix = "this->");
     void printOscB(std::string prefix = "this->");
-    void printOsc(Oscillator osc, std::string prefix);
 };
 
 ///////////////////////////////////////////////////////
@@ -1112,25 +1133,15 @@ void CompoundOscillator::printPhaseOffsetOscillatorB(std::string prefix)
     std::cout << prefix << "phaseOffsetOscillatorB: " << this->phaseOffsetOscillatorB << std::endl;
 }
 
-// internal helper function, should be private
-void CompoundOscillator::printOsc (Oscillator osc, std::string prefix)
-{
-    
-    std::cout << prefix << "oscillatorId: " << osc.oscillatorId << std::endl;        
-    std::cout << prefix << "sampleRate: " << osc.sampleRate << std::endl;
-    std::cout << prefix << "angularVelocity: " << osc.angularVelocity << std::endl;
-    std::cout << prefix << "currentPhase: " << osc.currentPhase << std::endl;
-    osc.printWaveform (prefix);
-}
 
 void CompoundOscillator::printOscA(std::string prefix)
 {
-    printOsc (this->oscA, prefix + "oscA.");
+    this->oscA.printOscillator (prefix + "oscA.");
 }
 
 void CompoundOscillator::printOscB(std::string prefix)
 {
-    printOsc (this->oscB, prefix + "oscB.");
+    this->oscB.printOscillator (prefix + "oscB.");
 }
 
 
@@ -1161,6 +1172,13 @@ struct SimpleMonoSynth
     float generateSample();
     //   3) dump given number of samples on console. Shown step numbers can be shifted by offset.
     void dumpSamples (int numSteps, int firstStepOffset = 0);
+
+    // print functions for members, Part 2
+    void printAmountOfLfoModulation(std::string prefix = "this->");
+    void printAmplitudeOfPlayingNote(std::string prefix = "this->");
+    void printOscillator(std::string prefix = "this->");
+    void printEnvelopeGate(std::string prefix = "this->");
+    void printLfo(std::string prefix = "this->");
 };
 
 ///////////////////////////////////////////////////////
@@ -1237,7 +1255,35 @@ void SimpleMonoSynth::dumpSamples (int numSteps, int firstStepOffset)
                   << std::endl;
     }
 }
-        
+
+
+// print functions for members, Part 2
+void SimpleMonoSynth::printAmountOfLfoModulation (std::string prefix)
+{
+    std::cout << prefix << "balance: " << this->balance << std::endl;
+}
+
+void SimpleMonoSynth::printAmplitudeOfPlayingNote (std::string prefix)
+{
+    std::cout << prefix << "balance: " << this->balance << std::endl;
+}
+
+void SimpleMonoSynth::printOscillator (std::string prefix)
+{
+    this->oscillator.printOscillator (prefix + "oscillator.");
+}
+
+void SimpleMonoSynth::printEnvelopeGate (std::string prefix)
+{
+    this->envelopeGate.printEnvelopeGate (prefix + "envelopeGate.");
+}
+
+void SimpleMonoSynth::printLfo (std::string prefix)
+{
+    this->lfo.printLfo (prefix + "lfo.");
+}
+
+
 /*
  MAKE SURE YOU ARE NOT ON THE MASTER BRANCH
 
