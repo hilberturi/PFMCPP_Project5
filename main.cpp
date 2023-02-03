@@ -1021,6 +1021,14 @@ struct CompoundOscillator
     float generateSample();
     // 3) dump given number of generated samples on console
     void dumpSamples(int numSamples, bool restoreCurrentPhase = false);
+
+    // print functions for members, Part 2
+    void printBalance(std::string prefix = "this->");
+    void printDetuneInCent(std::string prefix = "this->");
+    void printPhaseOffsetOscillatorB(std::string prefix = "this->");
+    void printOscA(std::string prefix = "this->");
+    void printOscB(std::string prefix = "this->");
+    void printOsc(Oscillator osc, std::string prefix);
 };
 
 ///////////////////////////////////////////////////////
@@ -1086,6 +1094,43 @@ void CompoundOscillator::dumpSamples(int numSamples, bool restoreCurrentPhase)
         oscA.currentPhase = currentPhaseOscABeforeDumpSamples;
         oscB.currentPhase = currentPhaseOscBBeforeDumpSamples;
     }    
+}
+
+// print functions for members, Part 2
+void CompoundOscillator::printBalance(std::string prefix)
+{
+    std::cout << prefix << "balance: " << this->balance << std::endl;
+}
+
+void CompoundOscillator::printDetuneInCent(std::string prefix)
+{
+    std::cout << prefix << "detuneInCent: " << this->detuneInCent << std::endl;
+}
+
+void CompoundOscillator::printPhaseOffsetOscillatorB(std::string prefix)
+{
+    std::cout << prefix << "phaseOffsetOscillatorB: " << this->phaseOffsetOscillatorB << std::endl;
+}
+
+// internal helper function, should be private
+void CompoundOscillator::printOsc (Oscillator osc, std::string prefix)
+{
+    
+    std::cout << prefix << "oscillatorId: " << osc.oscillatorId << std::endl;        
+    std::cout << prefix << "sampleRate: " << osc.sampleRate << std::endl;
+    std::cout << prefix << "angularVelocity: " << osc.angularVelocity << std::endl;
+    std::cout << prefix << "currentPhase: " << osc.currentPhase << std::endl;
+    osc.printWaveform (prefix);
+}
+
+void CompoundOscillator::printOscA(std::string prefix)
+{
+    printOsc (this->oscA, prefix + "oscA.");
+}
+
+void CompoundOscillator::printOscB(std::string prefix)
+{
+    printOsc (this->oscB, prefix + "oscB.");
 }
 
 
@@ -1544,29 +1589,50 @@ int main()
         std::string waveAPrefix {oscAPrefix + "waveform."};
         std::string waveBPrefix {oscBPrefix + "waveform."};
 
-        std::cout << oscPrefix << "balance: " << osc.balance << std::endl;        
+        std::cout << oscPrefix << "balance: " << osc.balance << std::endl;
+        osc.printBalance (oscPrefix);
         std::cout << oscPrefix << "detuneInCent: " << osc.detuneInCent << std::endl;        
+        osc.printDetuneInCent (oscPrefix);        
         std::cout << oscPrefix << "phaseOffsetOscillatorB: " << osc.phaseOffsetOscillatorB << std::endl; 
+        osc.printPhaseOffsetOscillatorB (oscPrefix);
         
         std::cout << oscAPrefix << "oscillatorId: " << osc.oscA.oscillatorId << std::endl;        
+        osc.oscA.printOscillatorId (oscAPrefix);
         std::cout << oscAPrefix << "sampleRate: " << osc.oscA.sampleRate << std::endl;
+        osc.oscA.printSampleRate (oscAPrefix);
         std::cout << oscAPrefix << "angularVelocity: " << osc.oscA.angularVelocity << std::endl;
+        osc.oscA.printAngularVelocity (oscAPrefix);
         std::cout << oscAPrefix << "currentPhase: " << osc.oscA.currentPhase << std::endl;
+        osc.oscA.printCurrentPhase (oscAPrefix);
         std::cout << waveAPrefix << "name: " << osc.oscA.waveform.name << std::endl;
+        osc.oscA.waveform.printName (waveAPrefix);
         std::cout << waveAPrefix << "interpolationType: " << osc.oscA.waveform.interpolationType << std::endl;
+        osc.oscA.waveform.printInterpolationType (waveAPrefix);
         std::cout << waveAPrefix << "numSupportPoints: " << osc.oscA.waveform.numSupportPoints << std::endl;
+        osc.oscA.waveform.printNumSupportPoints (waveAPrefix);
         std::cout << waveAPrefix << "phaseIncrement: " << osc.oscA.waveform.phaseIncrement << std::endl;
+        osc.oscA.waveform.printPhaseIncrement (waveAPrefix);
         std::cout << waveAPrefix << "flipPolarity: " << osc.oscA.waveform.flipPolarity << std::endl;
+        osc.oscA.waveform.printFlipPolarity (waveAPrefix);
 
         std::cout << oscBPrefix << "oscillatorId: " << osc.oscB.oscillatorId << std::endl;        
+        osc.oscB.printOscillatorId (oscBPrefix);
         std::cout << oscBPrefix << "sampleRate: " << osc.oscB.sampleRate << std::endl;
+        osc.oscB.printSampleRate (oscBPrefix);
         std::cout << oscBPrefix << "angularVelocity: " << osc.oscB.angularVelocity << std::endl;
+        osc.oscB.printAngularVelocity (oscBPrefix);
         std::cout << oscBPrefix << "currentPhase: " << osc.oscB.currentPhase << std::endl;
+        osc.oscB.printCurrentPhase (oscBPrefix);
         std::cout << waveBPrefix << "name: " << osc.oscB.waveform.name << std::endl;
+        osc.oscB.waveform.printName (waveBPrefix);
         std::cout << waveBPrefix << "interpolationType: " << osc.oscB.waveform.interpolationType << std::endl;
+        osc.oscB.waveform.printInterpolationType (waveBPrefix);
         std::cout << waveBPrefix << "numSupportPoints: " << osc.oscB.waveform.numSupportPoints << std::endl;
+        osc.oscB.waveform.printNumSupportPoints (waveBPrefix);
         std::cout << waveBPrefix << "phaseIncrement: " << osc.oscB.waveform.phaseIncrement << std::endl;
+        osc.oscB.waveform.printPhaseIncrement (waveBPrefix);
         std::cout << waveBPrefix << "flipPolarity: " << osc.oscB.waveform.flipPolarity << std::endl;
+        osc.oscB.waveform.printFlipPolarity (waveBPrefix);
         
         std::cout << std::endl;    
     }
