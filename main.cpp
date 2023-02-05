@@ -77,7 +77,7 @@ void Axe::aConstMemberFunction() const { }
  */
 
 
-
+#include "LeakedObjectDetector.h"
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -160,6 +160,8 @@ struct Oscillator
     void printCurrentPhase(std::string prefix = "this->");
     void printWaveform(std::string prefix = "this->");
     void printOscillator(std::string prefix = "this->");
+
+    JUCE_LEAK_DETECTOR(Oscillator)
 };
 
 // Implementation of nested UDT Oscillator::SingleCycleWaveform:
@@ -484,6 +486,8 @@ struct EnvelopeGate
     void printLastComputedNormalizedSample(std::string prefix = "this->");
     void printEnvelopeParameters(std::string prefix = "this->");
     void printEnvelopeGate(std::string prefix = "this->");
+
+    JUCE_LEAK_DETECTOR(EnvelopeGate)
 };
 
 
@@ -916,6 +920,8 @@ struct LowFrequencyOscillator
     void printCurrentPhase(std::string prefix = "this->");
     void printCurrentAmplitude(std::string prefix = "this->");
     void printLowFrequencyOscillator(std::string prefix = "this->");
+
+    JUCE_LEAK_DETECTOR(LowFrequencyOscillator)
 };
 
 ///////////////////////////////////////////////////////
@@ -1062,6 +1068,8 @@ struct CompoundOscillator
     void printPhaseOffsetOscillatorB(std::string prefix = "this->");
     void printOscA(std::string prefix = "this->");
     void printOscB(std::string prefix = "this->");
+
+    JUCE_LEAK_DETECTOR(CompoundOscillator)
 };
 
 ///////////////////////////////////////////////////////
@@ -1191,6 +1199,8 @@ struct SimpleMonoSynth
     void printOscillator(std::string prefix = "this->");
     void printEnvelopeGate(std::string prefix = "this->");
     void printLfo(std::string prefix = "this->");
+
+    JUCE_LEAK_DETECTOR(SimpleMonoSynth)
 };
 
 ///////////////////////////////////////////////////////
@@ -1493,6 +1503,58 @@ void dumpUDTBehaviour() {
 
     }    
 }
+
+// Wrapper classes added for Part 3
+
+struct OscillatorWrapper
+{
+    OscillatorWrapper (Oscillator* pointerToGetOwned) : pointerToOscillator(pointerToGetOwned) {}
+    ~OscillatorWrapper()
+    {
+        delete pointerToOscillator;   
+    }
+    Oscillator* pointerToOscillator; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+};
+
+struct EnvelopeGateWrapper
+{
+    EnvelopeGateWrapper (EnvelopeGate* pointerToGetOwned) : pointerToEnvelopeGate(pointerToGetOwned) {}
+    ~EnvelopeGateWrapper()
+    {
+        delete pointerToEnvelopeGate;   
+    }
+    EnvelopeGate* pointerToEnvelopeGate; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+};
+
+struct LowFrequencyOscillatorWrapper
+{
+    LowFrequencyOscillatorWrapper (LowFrequencyOscillator* pointerToGetOwned) : pointerToLowFrequencyOscillator(pointerToGetOwned) {}
+    ~LowFrequencyOscillatorWrapper()
+    {
+        delete pointerToLowFrequencyOscillator;   
+    }
+    LowFrequencyOscillator* pointerToLowFrequencyOscillator; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+};
+
+struct CompoundOscillatorWrapper
+{
+    CompoundOscillatorWrapper (CompoundOscillator* pointerToGetOwned) : pointerToCompoundOscillator(pointerToGetOwned) {}
+    ~CompoundOscillatorWrapper()
+    {
+        delete pointerToCompoundOscillator;   
+    }
+    CompoundOscillator* pointerToCompoundOscillator; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+};
+
+struct SimpleMonoSynthWrapper
+{
+    SimpleMonoSynthWrapper (SimpleMonoSynth* pointerToGetOwned) : pointerToSimpleMonoSynth(pointerToGetOwned) {}
+    ~SimpleMonoSynthWrapper()
+    {
+        delete pointerToSimpleMonoSynth;   
+    }
+    SimpleMonoSynth* pointerToSimpleMonoSynth; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+};
 
 int main()
 {
