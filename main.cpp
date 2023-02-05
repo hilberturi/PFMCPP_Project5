@@ -1762,25 +1762,25 @@ int main()
 
         std::cout << std::endl;        
         
-        SimpleMonoSynth synth {44100};
+        SimpleMonoSynthWrapper synth {new SimpleMonoSynth {44100}};
         
         int midiNoteNumber = 69;
         double tuningInHz = 440;
         float velocity = 0.8f;
 
-        synth.amountOfLfoLevelModulation = 0.5f;
+        synth.synthPtr->amountOfLfoLevelModulation = 0.5f;
 
         double attackTimeInSeconds = 0.005;
         double decayTimeInSeconds = 0.1; 
         float sustainLevel = 0.4f;
         double releaseTimeInSeconds = 0.8;
         
-        synth.envelopeGate
+        synth.synthPtr->envelopeGate
              .envelopeParameters
              .adjustParameters (attackTimeInSeconds, decayTimeInSeconds, 
                                 sustainLevel, releaseTimeInSeconds);
         
-        synth.triggerNote (true, midiNoteNumber, velocity, tuningInHz);
+        synth.synthPtr->triggerNote (true, midiNoteNumber, velocity, tuningInHz);
                 
         std::cout << std::endl;        
 
@@ -1792,83 +1792,83 @@ int main()
         std::string lfoPrefix {synthPrefix + "lfo."};
 
         std::cout << synthPrefix << "amountOfLfoLevelModulation: " 
-                  << synth.amountOfLfoLevelModulation << std::endl;
-        synth.printAmountOfLfoLevelModulation(synthPrefix);
+                  << synth.synthPtr->amountOfLfoLevelModulation << std::endl;
+        synth.synthPtr->printAmountOfLfoLevelModulation(synthPrefix);
         std::cout << synthPrefix << "amplitudeOfPlayingNote: " 
-                  << synth.amplitudeOfPlayingNote << std::endl; 
-        synth.printAmplitudeOfPlayingNote(synthPrefix);             
+                  << synth.synthPtr->amplitudeOfPlayingNote << std::endl; 
+        synth.synthPtr->printAmplitudeOfPlayingNote(synthPrefix);             
 
         std::cout << oscPrefix << "oscillatorId: " 
-                  << synth.oscillator.oscillatorId << std::endl;
-        synth.oscillator.printOscillatorId (oscPrefix);
+                  << synth.synthPtr->oscillator.oscillatorId << std::endl;
+        synth.synthPtr->oscillator.printOscillatorId (oscPrefix);
         std::cout << oscPrefix << "sampleRate: " 
-                  << synth.oscillator.sampleRate << std::endl;
-        synth.oscillator.printSampleRate (oscPrefix);
+                  << synth.synthPtr->oscillator.sampleRate << std::endl;
+        synth.synthPtr->oscillator.printSampleRate (oscPrefix);
         std::cout << oscPrefix << "angularVelocity: " 
-                  << synth.oscillator.angularVelocity << std::endl;
-        synth.oscillator.printAngularVelocity (oscPrefix);
+                  << synth.synthPtr->oscillator.angularVelocity << std::endl;
+        synth.synthPtr->oscillator.printAngularVelocity (oscPrefix);
         std::cout << oscPrefix << "currentPhase: " 
-                  << synth.oscillator.currentPhase << std::endl;
-        synth.oscillator.printCurrentPhase (oscPrefix);
+                  << synth.synthPtr->oscillator.currentPhase << std::endl;
+        synth.synthPtr->oscillator.printCurrentPhase (oscPrefix);
         std::cout << wavePrefix << "name: " 
-                  << synth.oscillator.waveform.name << std::endl;
-        synth.oscillator.waveform.printName (wavePrefix);
+                  << synth.synthPtr->oscillator.waveform.name << std::endl;
+        synth.synthPtr->oscillator.waveform.printName (wavePrefix);
         std::cout << wavePrefix << "interpolationType: " 
-                  << synth.oscillator.waveform.interpolationType << std::endl;
-        synth.oscillator.waveform.printInterpolationType (wavePrefix);
+                  << synth.synthPtr->oscillator.waveform.interpolationType << std::endl;
+        synth.synthPtr->oscillator.waveform.printInterpolationType (wavePrefix);
         std::cout << wavePrefix << "numSupportPoints: " 
-                  << synth.oscillator.waveform.numSupportPoints << std::endl;
-        synth.oscillator.waveform.printNumSupportPoints (wavePrefix);
+                  << synth.synthPtr->oscillator.waveform.numSupportPoints << std::endl;
+        synth.synthPtr->oscillator.waveform.printNumSupportPoints (wavePrefix);
         std::cout << wavePrefix << "phaseIncrement: " 
-                  << synth.oscillator.waveform.phaseIncrement << std::endl;
-        synth.oscillator.waveform.printPhaseIncrement (wavePrefix);
+                  << synth.synthPtr->oscillator.waveform.phaseIncrement << std::endl;
+        synth.synthPtr->oscillator.waveform.printPhaseIncrement (wavePrefix);
         std::cout << wavePrefix << "flipPolarity: " 
-                  << synth.oscillator.waveform.flipPolarity << std::endl;
-        synth.oscillator.waveform.printFlipPolarity (wavePrefix);
+                  << synth.synthPtr->oscillator.waveform.flipPolarity << std::endl;
+        synth.synthPtr->oscillator.waveform.printFlipPolarity (wavePrefix);
 
         std::cout << egPrefix << "envelopeState: " 
-                  << synth.envelopeGate.envelopeState << std::endl;
-        synth.envelopeGate.printEnvelopeState(egPrefix);
+                  << synth.synthPtr->envelopeGate.envelopeState << std::endl;
+        synth.synthPtr->envelopeGate.printEnvelopeState(egPrefix);
         std::cout << egPrefix << "normalizedTargetValueInCurrentState: " 
-                  << synth.envelopeGate.normalizedTargetValueInCurrentState << std::endl;        
-        synth.envelopeGate.printNormalizedTargetValueInCurrentState (egPrefix);
+                  << synth.synthPtr->envelopeGate.normalizedTargetValueInCurrentState << std::endl;        
+        synth.synthPtr->envelopeGate.printNormalizedTargetValueInCurrentState (egPrefix);
         std::cout << egPrefix << "normalizedDeltaPerStep: " 
-                  << synth.envelopeGate.normalizedDeltaPerStep << std::endl;        
-        synth.envelopeGate.printNormalizedDeltaPerStep (egPrefix);
+                  << synth.synthPtr->envelopeGate.normalizedDeltaPerStep << std::endl;        
+        synth.synthPtr->envelopeGate.printNormalizedDeltaPerStep (egPrefix);
         std::cout << egPrefix << "lastComputedNormalizedSample: " 
-                  << synth.envelopeGate.lastComputedNormalizedSample << std::endl;    
-        synth.envelopeGate.printLastComputedNormalizedSample (egPrefix);
+                  << synth.synthPtr->envelopeGate.lastComputedNormalizedSample << std::endl;    
+        synth.synthPtr->envelopeGate.printLastComputedNormalizedSample (egPrefix);
         std::cout << paramsPrefix << "attackTimeInSamples: " 
-                  << synth.envelopeGate.envelopeParameters.attackTimeInSamples << std::endl;     
-        synth.envelopeGate.envelopeParameters.printAttackTimeInSamples (paramsPrefix);
+                  << synth.synthPtr->envelopeGate.envelopeParameters.attackTimeInSamples << std::endl;     
+        synth.synthPtr->envelopeGate.envelopeParameters.printAttackTimeInSamples (paramsPrefix);
         std::cout << paramsPrefix << "decayTimeInSamples: " 
-                  << synth.envelopeGate.envelopeParameters.decayTimeInSamples << std::endl;        
-        synth.envelopeGate.envelopeParameters.printDecayTimeInSamples (paramsPrefix);
+                  << synth.synthPtr->envelopeGate.envelopeParameters.decayTimeInSamples << std::endl;        
+        synth.synthPtr->envelopeGate.envelopeParameters.printDecayTimeInSamples (paramsPrefix);
         std::cout << paramsPrefix << "normalizedSustainLevel: " 
-                  << synth.envelopeGate.envelopeParameters.normalizedSustainLevel << std::endl;        
-        synth.envelopeGate.envelopeParameters.printNormalizedSustainLevel (paramsPrefix);
+                  << synth.synthPtr->envelopeGate.envelopeParameters.normalizedSustainLevel << std::endl;        
+        synth.synthPtr->envelopeGate.envelopeParameters.printNormalizedSustainLevel (paramsPrefix);
         std::cout << paramsPrefix << "releaseTimeInSamples: " 
-                  << synth.envelopeGate.envelopeParameters.releaseTimeInSamples << std::endl;        
-        synth.envelopeGate.envelopeParameters.printReleaseTimeInSamples (paramsPrefix);
+                  << synth.synthPtr->envelopeGate.envelopeParameters.releaseTimeInSamples << std::endl;        
+        synth.synthPtr->envelopeGate.envelopeParameters.printReleaseTimeInSamples (paramsPrefix);
         std::cout << paramsPrefix << "exponentOfShapePowerFunction: " 
-                  << synth.envelopeGate.envelopeParameters.exponentOfShapePowerFunction << std::endl;        
-        synth.envelopeGate.envelopeParameters.printExponentOfShapePowerFunction (paramsPrefix);
+                  << synth.synthPtr->envelopeGate.envelopeParameters.exponentOfShapePowerFunction << std::endl;        
+        synth.synthPtr->envelopeGate.envelopeParameters.printExponentOfShapePowerFunction (paramsPrefix);
 
         std::cout << lfoPrefix << "sampleRateInHz: " 
-                  << synth.lfo.sampleRateInHz << std::endl;        
-        synth.lfo.printSampleRateInHz (lfoPrefix);
+                  << synth.synthPtr->lfo.sampleRateInHz << std::endl;        
+        synth.synthPtr->lfo.printSampleRateInHz (lfoPrefix);
         std::cout << lfoPrefix << "phaseIncrementPerStep: " 
-                  << synth.lfo.phaseIncrementPerStep << std::endl;        
-        synth.lfo.printPhaseIncrementPerStep (lfoPrefix);
+                  << synth.synthPtr->lfo.phaseIncrementPerStep << std::endl;        
+        synth.synthPtr->lfo.printPhaseIncrementPerStep (lfoPrefix);
         std::cout << lfoPrefix << "amplitudeDeltaPerStep: " 
-                  << synth.lfo.amplitudeDeltaPerStep << std::endl;        
-        synth.lfo.printAmplitudeDeltaPerStep (lfoPrefix);
+                  << synth.synthPtr->lfo.amplitudeDeltaPerStep << std::endl;        
+        synth.synthPtr->lfo.printAmplitudeDeltaPerStep (lfoPrefix);
         std::cout << lfoPrefix << "currentPhase: " 
-                  << synth.lfo.currentPhase << std::endl;        
-        synth.lfo.printCurrentPhase (lfoPrefix);
+                  << synth.synthPtr->lfo.currentPhase << std::endl;        
+        synth.synthPtr->lfo.printCurrentPhase (lfoPrefix);
         std::cout << lfoPrefix << "currentAmplitude: " 
-                  << synth.lfo.currentAmplitude << std::endl;        
-        synth.lfo.printCurrentAmplitude (lfoPrefix);
+                  << synth.synthPtr->lfo.currentAmplitude << std::endl;        
+        synth.synthPtr->lfo.printCurrentAmplitude (lfoPrefix);
 
         std::cout << std::endl;    
     }
