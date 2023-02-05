@@ -1508,22 +1508,22 @@ void dumpUDTBehaviour() {
 
 struct OscillatorWrapper
 {
-    OscillatorWrapper (Oscillator* pointerToGetOwned) : pointerToOscillator(pointerToGetOwned) {}
+    OscillatorWrapper (Oscillator* pointerToGetOwned) : oscPtr(pointerToGetOwned) {}
     ~OscillatorWrapper()
     {
-        delete pointerToOscillator;   
+        delete oscPtr;   
     }
-    Oscillator* pointerToOscillator; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+    Oscillator* oscPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 struct EnvelopeGateWrapper
 {
-    EnvelopeGateWrapper (EnvelopeGate* pointerToGetOwned) : pointerToEnvelopeGate(pointerToGetOwned) {}
+    EnvelopeGateWrapper (EnvelopeGate* pointerToGetOwned) : egPtr(pointerToGetOwned) {}
     ~EnvelopeGateWrapper()
     {
-        delete pointerToEnvelopeGate;   
+        delete egPtr;
     }
-    EnvelopeGate* pointerToEnvelopeGate; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+    EnvelopeGate* egPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 struct LowFrequencyOscillatorWrapper
@@ -1567,7 +1567,7 @@ int main()
     }
 
     // print members from here and from member functions
-    // solution for Part2
+    // solution for Part2, with added wrappers for Part3
     
     {
         // block for testing UDT1: Oscillator and nested UDT SingleCycleWaveform
@@ -1575,29 +1575,29 @@ int main()
         std::string oscPrefix {"oscillator."};
         std::string wavePrefix {oscPrefix + "waveform."};
         
-        Oscillator osc {"osc1"};
-        osc.reset (4410);
+        OscillatorWrapper osc {new Oscillator {"osc1"}};
+        osc.oscPtr->reset (4410);
 
         std::cout << std::endl;
         
-        std::cout << oscPrefix << "oscillatorId: " << osc.oscillatorId << std::endl; 
-        osc.printOscillatorId (oscPrefix);
-        std::cout << oscPrefix << "sampleRate: " << osc.sampleRate << std::endl;
-        osc.printSampleRate (oscPrefix);
-        std::cout << oscPrefix << "angularVelocity: " << osc.angularVelocity << std::endl;
-        osc.printAngularVelocity (oscPrefix);
-        std::cout << oscPrefix << "currentPhase: " << osc.currentPhase << std::endl;
-        osc.printCurrentPhase (oscPrefix);
-        std::cout << wavePrefix << "name: " << osc.waveform.name << std::endl;
-        osc.waveform.printName (wavePrefix);
-        std::cout << wavePrefix << "interpolationType: " << osc.waveform.interpolationType << std::endl;
-        osc.waveform.printInterpolationType (wavePrefix);
-        std::cout << wavePrefix << "numSupportPoints: " << osc.waveform.numSupportPoints << std::endl;
-        osc.waveform.printNumSupportPoints (wavePrefix);
-        std::cout << wavePrefix << "phaseIncrement: " << osc.waveform.phaseIncrement << std::endl;
-        osc.waveform.printPhaseIncrement (wavePrefix);
-        std::cout << wavePrefix << "flipPolarity: " << osc.waveform.flipPolarity << std::endl;
-        osc.waveform.printFlipPolarity (wavePrefix);
+        std::cout << oscPrefix << "oscillatorId: " << osc.oscPtr->oscillatorId << std::endl; 
+        osc.oscPtr->printOscillatorId (oscPrefix);
+        std::cout << oscPrefix << "sampleRate: " << osc.oscPtr->sampleRate << std::endl;
+        osc.oscPtr->printSampleRate (oscPrefix);
+        std::cout << oscPrefix << "angularVelocity: " << osc.oscPtr->angularVelocity << std::endl;
+        osc.oscPtr->printAngularVelocity (oscPrefix);
+        std::cout << oscPrefix << "currentPhase: " << osc.oscPtr->currentPhase << std::endl;
+        osc.oscPtr->printCurrentPhase (oscPrefix);
+        std::cout << wavePrefix << "name: " << osc.oscPtr->waveform.name << std::endl;
+        osc.oscPtr->waveform.printName (wavePrefix);
+        std::cout << wavePrefix << "interpolationType: " << osc.oscPtr->waveform.interpolationType << std::endl;
+        osc.oscPtr->waveform.printInterpolationType (wavePrefix);
+        std::cout << wavePrefix << "numSupportPoints: " << osc.oscPtr->waveform.numSupportPoints << std::endl;
+        osc.oscPtr->waveform.printNumSupportPoints (wavePrefix);
+        std::cout << wavePrefix << "phaseIncrement: " << osc.oscPtr->waveform.phaseIncrement << std::endl;
+        osc.oscPtr->waveform.printPhaseIncrement (wavePrefix);
+        std::cout << wavePrefix << "flipPolarity: " << osc.oscPtr->waveform.flipPolarity << std::endl;
+        osc.oscPtr->waveform.printFlipPolarity (wavePrefix);
         
         std::cout << std::endl;
     }
