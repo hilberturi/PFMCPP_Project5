@@ -106,7 +106,7 @@ struct Oscillator
 
         // 3 things it can do:
         //     1) compute interpolated sample given phase and angular velocity
-        float computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent = true);
+        float computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent = true) const;
 
         //     2) transform shape in various ways
         void transformShape (bool flipPolarity = false, bool normalize = false, 
@@ -114,18 +114,18 @@ struct Oscillator
 
         //     3) dump waveform by generating samples at equidistant steps (as
         //        given by numSupportPoints) and showing them on the console.
-        void dumpWaveform (float scaling = 1);
+        void dumpWaveform (float scaling = 1) const;
 
         // I need an internal helper function, 0 <= sampleIndex < numSupportPoints
-        float getSampleAtIndex (int sampleIndex);
+        float getSampleAtIndex (int sampleIndex) const;
 
         // print functions for members, Part 2
-        void printName(std::string prefix = "this->");
-        void printInterpolationType(std::string prefix = "this->");
-        void printNumSupportPoints(std::string prefix = "this->");
-        void printPhaseIncrement(std::string prefix = "this->");
-        void printFlipPolarity(std::string prefix = "this->");
-        void printWaveform(std::string prefix = "this->");
+        void printName(const std::string& prefix = "this->") const;
+        void printInterpolationType(const std::string& prefix = "this->") const;
+        void printNumSupportPoints(const std::string& prefix = "this->") const;
+        void printPhaseIncrement(const std::string& prefix = "this->") const;
+        void printFlipPolarity(const std::string& prefix = "this->") const;
+        void printWaveform(const std::string& prefix = "this->") const;
 };
 
     Oscillator (std::string oscillatorId, float sampleRate = 44100);
@@ -154,12 +154,12 @@ struct Oscillator
     void dumpSamples (int numSamples, bool restoreCurrentPhase = false);
 
     // print functions for members, Part 2
-    void printOscillatorId(std::string prefix = "this->");
-    void printSampleRate(std::string prefix = "this->");
-    void printAngularVelocity(std::string prefix = "this->");
-    void printCurrentPhase(std::string prefix = "this->");
-    void printWaveform(std::string prefix = "this->");
-    void printOscillator(std::string prefix = "this->");
+    void printOscillatorId(const std::string& prefix = "this->") const;
+    void printSampleRate(const std::string& prefix = "this->") const;
+    void printAngularVelocity(const std::string& prefix = "this->") const;
+    void printCurrentPhase(const std::string& prefix = "this->") const;
+    void printWaveform(const std::string& prefix = "this->") const;
+    void printOscillator(const std::string& prefix = "this->") const;
 
     JUCE_LEAK_DETECTOR(Oscillator)
 };
@@ -181,7 +181,7 @@ Oscillator::SingleCycleWaveform::~SingleCycleWaveform()
 
 //     1) compute interpolated sample, phase in [0..2 pi)
 float Oscillator::SingleCycleWaveform
-    ::computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent)
+    ::computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent) const
 {
     if (! silent)
     {
@@ -243,7 +243,7 @@ void Oscillator::SingleCycleWaveform
 //     3) dump waveform by generating samples at equidistant steps 
 // (as given by numSupportPoints) and showing them on the console.
 void Oscillator::SingleCycleWaveform
-    ::dumpWaveform (float scaling)
+    ::dumpWaveform (float scaling) const
 {
     
     for (int i = 0; i < numSupportPoints; ++i)
@@ -258,7 +258,7 @@ void Oscillator::SingleCycleWaveform
     }
 }
 
-float Oscillator::SingleCycleWaveform::getSampleAtIndex (int sampleIndex)
+float Oscillator::SingleCycleWaveform::getSampleAtIndex (int sampleIndex) const
 {
     // This would normally look up the i-th precomputed value
     // in an array, but we do not know yet about arrays and
@@ -268,32 +268,32 @@ float Oscillator::SingleCycleWaveform::getSampleAtIndex (int sampleIndex)
     return (flipPolarity ? -rawSampleAtIndex : rawSampleAtIndex);
 }
 
-void Oscillator::SingleCycleWaveform::printName(std::string prefix)
+void Oscillator::SingleCycleWaveform::printName(const std::string& prefix) const
 {
     std::cout << prefix << "name: " << this->name << std::endl;
 }
 
-void Oscillator::SingleCycleWaveform::printInterpolationType(std::string prefix)
+void Oscillator::SingleCycleWaveform::printInterpolationType(const std::string& prefix) const
 {
     std::cout << prefix << "interpolationType: " << this->interpolationType << std::endl;
 }
 
-void Oscillator::SingleCycleWaveform::printNumSupportPoints(std::string prefix)
+void Oscillator::SingleCycleWaveform::printNumSupportPoints(const std::string& prefix) const
 {
     std::cout << prefix << "numSupportPoints: " << this->numSupportPoints << std::endl;
 }
 
-void Oscillator::SingleCycleWaveform::printPhaseIncrement(std::string prefix)
+void Oscillator::SingleCycleWaveform::printPhaseIncrement(const std::string& prefix) const
 {
     std::cout << prefix << "phaseIncrement: " << this->phaseIncrement << std::endl;
 }
 
-void Oscillator::SingleCycleWaveform::printFlipPolarity(std::string prefix)
+void Oscillator::SingleCycleWaveform::printFlipPolarity(const std::string& prefix) const
 {
     std::cout << prefix << "flipPolarity: " << this->flipPolarity << std::endl;
 }
 
-void Oscillator::SingleCycleWaveform::printWaveform(std::string prefix)
+void Oscillator::SingleCycleWaveform::printWaveform(const std::string& prefix) const
 {
     this->printName (prefix);
     this->printInterpolationType (prefix);
@@ -360,32 +360,32 @@ void Oscillator::dumpSamples (int numSamples, bool restoreCurrentPhase)
     }
 }
 
-void Oscillator::printOscillatorId(std::string prefix)
+void Oscillator::printOscillatorId(const std::string& prefix) const
 {
     std::cout << prefix << "oscillatorId: " << this->oscillatorId << std::endl;
 }
 
-void Oscillator::printSampleRate(std::string prefix)
+void Oscillator::printSampleRate(const std::string& prefix) const
 {
     std::cout << prefix << "sampleRate: " << this->sampleRate << std::endl;
 }
 
-void Oscillator::printAngularVelocity(std::string prefix)
+void Oscillator::printAngularVelocity(const std::string& prefix) const
 {
     std::cout << prefix << "angularVelocity: " << this->angularVelocity << std::endl;
 }
 
-void Oscillator::printCurrentPhase(std::string prefix)
+void Oscillator::printCurrentPhase(const std::string& prefix) const
 {
     std::cout << prefix << "currentPhase: " << this->currentPhase << std::endl;
 }
 
-void Oscillator::printWaveform(std::string prefix)
+void Oscillator::printWaveform(const std::string& prefix) const
 {
     this->waveform.printWaveform (prefix + "waveform.");
 }
 
-void Oscillator::printOscillator(std::string prefix)
+void Oscillator::printOscillator(const std::string& prefix) const
 {
     this->printOscillatorId (prefix);
     this->printSampleRate (prefix);
@@ -430,7 +430,7 @@ struct EnvelopeGate
         float exponentOfShapePowerFunction {1}; 
         // 3 things it can do:
         //     1) transform value by applying shape power function (or inverse)
-        float applyShapePowerFunction (float value, bool computeInverseFunction = false);
+        float applyShapePowerFunction (float value, bool computeInverseFunction = false) const;
 
         //     2) adjust parameters. midValuePoint is the normalized value in (0,1) 
         //         where the shape transform should reach 0.5
@@ -440,15 +440,15 @@ struct EnvelopeGate
                                double releaseTimeInSeconds, double midValuePoint = 0.5, double sampleRateInHz = 44100);
 
         //     3) something that requires a loop => dump shape
-        void dumpShape (int numberOfSteps = 11);
+        void dumpShape (int numberOfSteps = 11) const;
 
         // print functions for members, Part 2
-        void printAttackTimeInSamples(std::string prefix = "this->");
-        void printDecayTimeInSamples(std::string prefix = "this->");
-        void printNormalizedSustainLevel(std::string prefix = "this->");
-        void printReleaseTimeInSamples(std::string prefix = "this->");
-        void printExponentOfShapePowerFunction(std::string prefix = "this->");
-        void printEnvelopeParameters(std::string prefix = "this->");
+        void printAttackTimeInSamples(const std::string& prefix = "this->") const;
+        void printDecayTimeInSamples(const std::string& prefix = "this->") const;
+        void printNormalizedSustainLevel(const std::string& prefix = "this->") const;
+        void printReleaseTimeInSamples(const std::string& prefix = "this->") const;
+        void printExponentOfShapePowerFunction(const std::string& prefix = "this->") const;
+        void printEnvelopeParameters(const std::string& prefix = "this->") const;
     };
 
     // enclosing UDT2: EnvelopeGate
@@ -480,12 +480,12 @@ struct EnvelopeGate
     void dumpEnvelopeGateResponse (int numSamplesKeyPressed, int displayEveryNthStep = 1, int maxStepsAllowed = 1000000);
 
     // print functions for members, Part 2
-    void printEnvelopeState(std::string prefix = "this->");
-    void printNormalizedTargetValueInCurrentState(std::string prefix = "this->");
-    void printNormalizedDeltaPerStep(std::string prefix = "this->");
-    void printLastComputedNormalizedSample(std::string prefix = "this->");
-    void printEnvelopeParameters(std::string prefix = "this->");
-    void printEnvelopeGate(std::string prefix = "this->");
+    void printEnvelopeState(const std::string& prefix = "this->") const;
+    void printNormalizedTargetValueInCurrentState(const std::string& prefix = "this->") const;
+    void printNormalizedDeltaPerStep(const std::string& prefix = "this->") const;
+    void printLastComputedNormalizedSample(const std::string& prefix = "this->") const;
+    void printEnvelopeParameters(const std::string& prefix = "this->") const;
+    void printEnvelopeGate(const std::string& prefix = "this->") const;
 
     JUCE_LEAK_DETECTOR(EnvelopeGate)
 };
@@ -507,7 +507,7 @@ EnvelopeGate::EnvelopeParameters::~EnvelopeParameters()
 
 // 1) transform value by applying shape power function (or inverse function depending on flag)
 float EnvelopeGate::EnvelopeParameters
-    ::applyShapePowerFunction (float value, bool computeInverseFunction)
+    ::applyShapePowerFunction (float value, bool computeInverseFunction) const
 {
     if (computeInverseFunction)
     {
@@ -547,7 +547,7 @@ void EnvelopeGate::EnvelopeParameters
 
 // 3) something that requires a loop => dump shape
 void EnvelopeGate::EnvelopeParameters
-    ::dumpShape (int numberOfSteps)
+    ::dumpShape (int numberOfSteps) const
 {
     if (numberOfSteps <= 2)
     {
@@ -571,32 +571,32 @@ void EnvelopeGate::EnvelopeParameters
 }
 
 // print functions for members, Part 2
-void EnvelopeGate::EnvelopeParameters::printAttackTimeInSamples(std::string prefix)
+void EnvelopeGate::EnvelopeParameters::printAttackTimeInSamples(const std::string& prefix) const
 {
     std::cout << prefix << "attackTimeInSamples: " << this->attackTimeInSamples << std::endl;
 }
 
-void EnvelopeGate::EnvelopeParameters::printDecayTimeInSamples(std::string prefix)
+void EnvelopeGate::EnvelopeParameters::printDecayTimeInSamples(const std::string& prefix) const
 {
     std::cout << prefix << "decayTimeInSamples: " << this->decayTimeInSamples << std::endl;
 }
 
-void EnvelopeGate::EnvelopeParameters::printNormalizedSustainLevel(std::string prefix)
+void EnvelopeGate::EnvelopeParameters::printNormalizedSustainLevel(const std::string& prefix) const
 {
     std::cout << prefix << "normalizedSustainLevel: " << this->normalizedSustainLevel << std::endl;
 }
 
-void EnvelopeGate::EnvelopeParameters::printReleaseTimeInSamples(std::string prefix)
+void EnvelopeGate::EnvelopeParameters::printReleaseTimeInSamples(const std::string& prefix) const
 {
     std::cout << prefix << "releaseTimeInSamples: " << this->releaseTimeInSamples << std::endl;
 }
 
-void EnvelopeGate::EnvelopeParameters::printExponentOfShapePowerFunction(std::string prefix)
+void EnvelopeGate::EnvelopeParameters::printExponentOfShapePowerFunction(const std::string& prefix) const
 {
     std::cout << prefix << "exponentOfShapePowerFunction: " << this->exponentOfShapePowerFunction << std::endl;
 }
 
-void EnvelopeGate::EnvelopeParameters::printEnvelopeParameters(std::string prefix)
+void EnvelopeGate::EnvelopeParameters::printEnvelopeParameters(const std::string& prefix) const
 {
     std::string paramsPrefix {prefix + "envelopeParameters."};    
     this->printAttackTimeInSamples (prefix);
@@ -846,33 +846,33 @@ void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
 
 
 // print functions for members, Part 2
-void EnvelopeGate::printEnvelopeState(std::string prefix)
+void EnvelopeGate::printEnvelopeState(const std::string& prefix) const
 {
     std::cout << prefix << "envelopeState: " << this->envelopeState << std::endl;
 }
 
-void EnvelopeGate::printNormalizedTargetValueInCurrentState(std::string prefix)
+void EnvelopeGate::printNormalizedTargetValueInCurrentState(const std::string& prefix) const
 {
     std::cout << prefix << "normalizedTargetValueInCurrentState: " 
               << this->normalizedTargetValueInCurrentState << std::endl;
 }
 
-void EnvelopeGate::printNormalizedDeltaPerStep(std::string prefix)
+void EnvelopeGate::printNormalizedDeltaPerStep(const std::string& prefix) const
 {
     std::cout << prefix << "normalizedDeltaPerStep: " << this->normalizedDeltaPerStep << std::endl;
 }
 
-void EnvelopeGate::printLastComputedNormalizedSample(std::string prefix)
+void EnvelopeGate::printLastComputedNormalizedSample(const std::string& prefix) const
 {
     std::cout << prefix << "lastComputedNormalizedSample: " << this->lastComputedNormalizedSample << std::endl;
 }
 
-void EnvelopeGate::printEnvelopeParameters(std::string prefix)
+void EnvelopeGate::printEnvelopeParameters(const std::string& prefix) const
 {
     this->envelopeParameters.printEnvelopeParameters (prefix + "envelopeParameters.");
 }
 
-void EnvelopeGate::printEnvelopeGate(std::string prefix)
+void EnvelopeGate::printEnvelopeGate(const std::string& prefix) const
 {
     this->printEnvelopeState (prefix);
     this->printNormalizedTargetValueInCurrentState (prefix);
@@ -1508,39 +1508,62 @@ void dumpUDTBehaviour() {
 
 struct OscillatorWrapper
 {
-    OscillatorWrapper (Oscillator* pointerToGetOwned) : oscPtr(pointerToGetOwned) {}
+    OscillatorWrapper (Oscillator* pointerToGetOwned) : oscPtr(pointerToGetOwned)
+    {
+        std::cout << "constructor OscillatorWrapper" << std::endl; 
+    }
+
     ~OscillatorWrapper()
     {
+        std::cout << "destructor OscillatorWrapper" << std::endl; 
         delete oscPtr;   
     }
+
     Oscillator* oscPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 struct EnvelopeGateWrapper
 {
-    EnvelopeGateWrapper (EnvelopeGate* pointerToGetOwned) : egPtr(pointerToGetOwned) {}
+    EnvelopeGateWrapper (EnvelopeGate* pointerToGetOwned) : egPtr(pointerToGetOwned)
+    {
+        std::cout << "constructor EnvelopeGateWrapper" << std::endl; 
+    }
+
     ~EnvelopeGateWrapper()
     {
+        std::cout << "destructor EnvelopeGateWrapper" << std::endl; 
         delete egPtr;
     }
+
     EnvelopeGate* egPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 struct LowFrequencyOscillatorWrapper
 {
-    LowFrequencyOscillatorWrapper (LowFrequencyOscillator* pointerToGetOwned) : lfoPtr(pointerToGetOwned) {}
+    LowFrequencyOscillatorWrapper (LowFrequencyOscillator* pointerToGetOwned) : lfoPtr(pointerToGetOwned)
+    {
+        std::cout << "constructor LowFrequencyOscillatorWrapper" << std::endl; 
+    }
+
     ~LowFrequencyOscillatorWrapper()
     {
+        std::cout << "destructor LowFrequencyOscillatorWrapper" << std::endl; 
         delete lfoPtr;   
     }
+
     LowFrequencyOscillator* lfoPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 struct CompoundOscillatorWrapper
 {
-    CompoundOscillatorWrapper (CompoundOscillator* pointerToGetOwned) : coscPtr(pointerToGetOwned) {}
+    CompoundOscillatorWrapper (CompoundOscillator* pointerToGetOwned) : coscPtr(pointerToGetOwned)
+    {
+        std::cout << "constructor CompoundOscillatorWrapper" << std::endl; 
+    }
+
     ~CompoundOscillatorWrapper()
     {
+        std::cout << "destructor CompoundOscillatorWrapper" << std::endl; 
         delete coscPtr;   
     }
     CompoundOscillator* coscPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
@@ -1548,11 +1571,17 @@ struct CompoundOscillatorWrapper
 
 struct SimpleMonoSynthWrapper
 {
-    SimpleMonoSynthWrapper (SimpleMonoSynth* pointerToGetOwned) : synthPtr(pointerToGetOwned) {}
+    SimpleMonoSynthWrapper (SimpleMonoSynth* pointerToGetOwned) : synthPtr(pointerToGetOwned)
+    {
+        std::cout << "constructor SimpleMonoSynthWrapper" << std::endl; 
+    }
+
     ~SimpleMonoSynthWrapper()
     {
+        std::cout << "destructor SimpleMonoSynthWrapper" << std::endl; 
         delete synthPtr;   
     }
+
     SimpleMonoSynth* synthPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
