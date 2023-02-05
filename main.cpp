@@ -1528,32 +1528,32 @@ struct EnvelopeGateWrapper
 
 struct LowFrequencyOscillatorWrapper
 {
-    LowFrequencyOscillatorWrapper (LowFrequencyOscillator* pointerToGetOwned) : pointerToLowFrequencyOscillator(pointerToGetOwned) {}
+    LowFrequencyOscillatorWrapper (LowFrequencyOscillator* pointerToGetOwned) : lfoPtr(pointerToGetOwned) {}
     ~LowFrequencyOscillatorWrapper()
     {
-        delete pointerToLowFrequencyOscillator;   
+        delete lfoPtr;   
     }
-    LowFrequencyOscillator* pointerToLowFrequencyOscillator; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+    LowFrequencyOscillator* lfoPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 struct CompoundOscillatorWrapper
 {
-    CompoundOscillatorWrapper (CompoundOscillator* pointerToGetOwned) : pointerToCompoundOscillator(pointerToGetOwned) {}
+    CompoundOscillatorWrapper (CompoundOscillator* pointerToGetOwned) : coscPtr(pointerToGetOwned) {}
     ~CompoundOscillatorWrapper()
     {
-        delete pointerToCompoundOscillator;   
+        delete coscPtr;   
     }
-    CompoundOscillator* pointerToCompoundOscillator; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+    CompoundOscillator* coscPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 struct SimpleMonoSynthWrapper
 {
-    SimpleMonoSynthWrapper (SimpleMonoSynth* pointerToGetOwned) : pointerToSimpleMonoSynth(pointerToGetOwned) {}
+    SimpleMonoSynthWrapper (SimpleMonoSynth* pointerToGetOwned) : synthPtr(pointerToGetOwned) {}
     ~SimpleMonoSynthWrapper()
     {
-        delete pointerToSimpleMonoSynth;   
+        delete synthPtr;   
     }
-    SimpleMonoSynth* pointerToSimpleMonoSynth; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+    SimpleMonoSynth* synthPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
 };
 
 int main()
@@ -1607,7 +1607,7 @@ int main()
 
         std::cout << std::endl;
         
-        EnvelopeGate envelopeGate {};
+        EnvelopeGateWrapper envelopeGate {new EnvelopeGate};
 
         double attackTimeInSeconds  = 0.005;
         double decayTimeInSeconds   = 0.010;
@@ -1615,14 +1615,14 @@ int main()
         float sustainLevel = 0.5;
         double midValuePoint = 0.7;
 
-        envelopeGate.envelopeParameters
+        envelopeGate.egPtr->envelopeParameters
                     .adjustParameters (attackTimeInSeconds, 
                                        decayTimeInSeconds, 
                                        sustainLevel, 
                                        releaseTimeInSeconds, 
                                        midValuePoint);
         
-        envelopeGate.triggerEnvelope (true);
+        envelopeGate.egPtr->triggerEnvelope (true);
 
         std::cout << std::endl;
 
@@ -1630,32 +1630,32 @@ int main()
         std::string paramsPrefix {egPrefix + "envelopeParameters."};
         
         std::cout << egPrefix << "envelopeState: " 
-                  << envelopeGate.envelopeState << std::endl;
-        envelopeGate.printEnvelopeState (egPrefix);
+                  << envelopeGate.egPtr->envelopeState << std::endl;
+        envelopeGate.egPtr->printEnvelopeState (egPrefix);
         std::cout << egPrefix << "normalizedTargetValueInCurrentState: " 
-                  << envelopeGate.normalizedTargetValueInCurrentState << std::endl;        
-        envelopeGate.printNormalizedTargetValueInCurrentState (egPrefix);    
+                  << envelopeGate.egPtr->normalizedTargetValueInCurrentState << std::endl;        
+        envelopeGate.egPtr->printNormalizedTargetValueInCurrentState (egPrefix);    
         std::cout << egPrefix << "normalizedDeltaPerStep: " 
-                  << envelopeGate.normalizedDeltaPerStep << std::endl;        
-        envelopeGate.printNormalizedDeltaPerStep(egPrefix);    
+                  << envelopeGate.egPtr->normalizedDeltaPerStep << std::endl;        
+        envelopeGate.egPtr->printNormalizedDeltaPerStep(egPrefix);    
         std::cout << egPrefix << "lastComputedNormalizedSample: " 
-                  << envelopeGate.lastComputedNormalizedSample << std::endl;    
-        envelopeGate.printLastComputedNormalizedSample (egPrefix);    
+                  << envelopeGate.egPtr->lastComputedNormalizedSample << std::endl;    
+        envelopeGate.egPtr->printLastComputedNormalizedSample (egPrefix);    
         std::cout << paramsPrefix << "attackTimeInSamples: " 
-                  << envelopeGate.envelopeParameters.attackTimeInSamples << std::endl;        
-        envelopeGate.envelopeParameters.printAttackTimeInSamples (paramsPrefix);    
+                  << envelopeGate.egPtr->envelopeParameters.attackTimeInSamples << std::endl;        
+        envelopeGate.egPtr->envelopeParameters.printAttackTimeInSamples (paramsPrefix);    
         std::cout << paramsPrefix << "decayTimeInSamples: " 
-                  << envelopeGate.envelopeParameters.decayTimeInSamples << std::endl;        
-        envelopeGate.envelopeParameters.printDecayTimeInSamples (paramsPrefix);    
+                  << envelopeGate.egPtr->envelopeParameters.decayTimeInSamples << std::endl;        
+        envelopeGate.egPtr->envelopeParameters.printDecayTimeInSamples (paramsPrefix);    
         std::cout << paramsPrefix << "normalizedSustainLevel: " 
-                  << envelopeGate.envelopeParameters.normalizedSustainLevel << std::endl;        
-        envelopeGate.envelopeParameters.printNormalizedSustainLevel (paramsPrefix);    
+                  << envelopeGate.egPtr->envelopeParameters.normalizedSustainLevel << std::endl;        
+        envelopeGate.egPtr->envelopeParameters.printNormalizedSustainLevel (paramsPrefix);    
         std::cout << paramsPrefix << "releaseTimeInSamples: " 
-                  << envelopeGate.envelopeParameters.releaseTimeInSamples << std::endl;        
-        envelopeGate.envelopeParameters.printReleaseTimeInSamples (paramsPrefix);    
+                  << envelopeGate.egPtr->envelopeParameters.releaseTimeInSamples << std::endl;        
+        envelopeGate.egPtr->envelopeParameters.printReleaseTimeInSamples (paramsPrefix);    
         std::cout << paramsPrefix << "exponentOfShapePowerFunction: " 
-                  << envelopeGate.envelopeParameters.exponentOfShapePowerFunction << std::endl;        
-        envelopeGate.envelopeParameters.printExponentOfShapePowerFunction(paramsPrefix);    
+                  << envelopeGate.egPtr->envelopeParameters.exponentOfShapePowerFunction << std::endl;        
+        envelopeGate.egPtr->envelopeParameters.printExponentOfShapePowerFunction(paramsPrefix);    
         
         std::cout << std::endl;        
     }
@@ -1665,28 +1665,28 @@ int main()
 
         std::cout << std::endl;        
 
-        LowFrequencyOscillator lfo {44100};
+        LowFrequencyOscillatorWrapper lfo {new LowFrequencyOscillator {44100}};
 
         double speedInHz = 1; 
         double initialPhase = 0; 
         double riseTimeInSeconds = 1;
         
-        lfo.reset (speedInHz, initialPhase, riseTimeInSeconds);
+        lfo.lfoPtr->reset (speedInHz, initialPhase, riseTimeInSeconds);
                 
         std::cout << std::endl;        
 
         std::string lfoPrefix {"lfo."};
 
-        std::cout << lfoPrefix << "sampleRateInHz: " << lfo.sampleRateInHz << std::endl; 
-        lfo.printSampleRateInHz (lfoPrefix);
-        std::cout << lfoPrefix << "phaseIncrementPerStep: " << lfo.phaseIncrementPerStep << std::endl;        
-        lfo.printPhaseIncrementPerStep (lfoPrefix);
-        std::cout << lfoPrefix << "amplitudeDeltaPerStep: " << lfo.amplitudeDeltaPerStep << std::endl;        
-        lfo.printAmplitudeDeltaPerStep (lfoPrefix);
-        std::cout << lfoPrefix << "currentPhase: " << lfo.currentPhase << std::endl;        
-        lfo.printCurrentPhase (lfoPrefix);
-        std::cout << lfoPrefix << "currentAmplitude: " << lfo.currentAmplitude << std::endl;        
-        lfo.printCurrentAmplitude (lfoPrefix);
+        std::cout << lfoPrefix << "sampleRateInHz: " << lfo.lfoPtr->sampleRateInHz << std::endl; 
+        lfo.lfoPtr->printSampleRateInHz (lfoPrefix);
+        std::cout << lfoPrefix << "phaseIncrementPerStep: " << lfo.lfoPtr->phaseIncrementPerStep << std::endl;        
+        lfo.lfoPtr->printPhaseIncrementPerStep (lfoPrefix);
+        std::cout << lfoPrefix << "amplitudeDeltaPerStep: " << lfo.lfoPtr->amplitudeDeltaPerStep << std::endl;        
+        lfo.lfoPtr->printAmplitudeDeltaPerStep (lfoPrefix);
+        std::cout << lfoPrefix << "currentPhase: " << lfo.lfoPtr->currentPhase << std::endl;        
+        lfo.lfoPtr->printCurrentPhase (lfoPrefix);
+        std::cout << lfoPrefix << "currentAmplitude: " << lfo.lfoPtr->currentAmplitude << std::endl;        
+        lfo.lfoPtr->printCurrentAmplitude (lfoPrefix);
 
         std::cout << std::endl;        
     }
