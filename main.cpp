@@ -1,80 +1,68 @@
 /*
- Project 5: Part 3 / 4
- video: Chapter 3 Part 4: 
+ Project 5: Part 4 / 4
+ video: Chapter 3 Part 7
 
-Create a branch named Part3
+ Create a branch named Part4
+ 
+ Don't #include what you don't use
+ 
+ 1) Your task is to refactor your Chapter 3 Part 4 task into separate source and header files.
+         Add files via the pane on the left.
+ 
+ 2) Put all of your declarations for each class in .h files
+         One header file per class ( i.e. Raider.h for a class named "Raider" )
+         Don't forget the '#pragma once'
+ 
+ 3) Put all of your implementations in .cpp files.
+         one cpp file per class ( i.e. Raider.cpp for a class named "Raider" )
+ 
+ 4) Put all of your Wrapper classes in a single Wrappers.h file
+         if you implemented your wrapper class functions in-class, you'll need to move them to Wrappers.cpp, which goes along with instruction 5): 
+ 
+ 5) NO IN-CLASS IMPLEMENTATION ALLOWED.
+         the only exception is the existing Atomic.h and LeakedObjectDetector.h
+        Chances are extremely high that you implemented your 
+        wrapper class functions in-class, because that is what 
+        everyone does after watching the video where I implemented 
+        them in-class.
+ 
+ 6) for every .cpp file you have to make, insert it into the .replit file after 'main.cpp'.  Don't forget the spaces between file names.
+ If you need help with this step, send me a DM.
 
- the 'new' keyword
+ 7) When you add the #include statements for your refactored source files into main.cpp: 
+        '#include "Wrappers.h"' should be the first file that you include after LeakedObjectDetector.h
+ 
+ 8) Go through every cpp file and header file. check all function implementations for the following:
+        Can this function argument be declared as 'const'? 
+        Can this function be declared as 'const'?
+        You learned about 'const' function arguments and 'const' functions in Project 5 Part 3
+        As a refresher:
+            If you aren't modifying the passed-in object inside the function, pass by 'const reference'.
+            Marking a function parameter as 'const' means that you are promising that the parameter will not be modified.
+            Additionally, you can mark class member functions as 'const'
+            If you do this, you are promising that the member function will not modify any member variables.
 
- 1) add #include "LeakedObjectDetector.h" to main
- 
- 2) Add 'JUCE_LEAK_DETECTOR(OwnerClass)' at the end of your UDTs.
- 
- 3) write the name of your class where it says "OwnerClass"
- 
- 4) write wrapper classes for each type similar to how it was shown in the video
- 
- 5) update main() 
-      replace your objects with your wrapper classes, which have your UDTs as pointer member variables.
-      
-    This means if you had something like the following in your main() previously: 
+        Mark every member function that is not modifying any member variables as 'const'
+        Mark every function parameter that is not modified inside the function as 'const'
 */
 #if false
- Axe axe;
- std::cout << "axe sharpness: " << axe.sharpness << "\n";
- #endif
- /*
-    you would update that to use your wrappers:
-    
- */
-
-#if false
-AxeWrapper axWrapper( new Axe() );
-std::cout << "axe sharpness: " << axWrapper.axPtr->sharpness << "\n";
-#endif
-/*
-notice that the object name has changed from 'axe' to 'axWrapper'
-You don't have to do this, you can keep your current object name and just change its type to your Wrapper class
-
-6) If you have a class that has a nested class in it, and an instantiation of that nested class as a member variable, 
-    - you do not need to write a Wrapper for that nested class
-    - you do not need to replace that nested instance with a wrapped instance.
-    If you want an explanation, message me in Slack
-
-7) If you were using any UDTs as function arguments like this:
-*/
-#if false
-void someMemberFunction(Axe axe);
-#endif
-/*
-  Pass those arguments by Reference now that you know what references are (Project 6 Part 2).
-*/
-#if false
-void someMemberFunction(Axe& axe);
-#endif
-/*
-If you aren't modifying the passed-in object inside the function, pass by 'const reference'.
-Marking a function parameter as 'const' means that you are promising that the parameter will not be modified.
-Additionally, you can mark class member functions as 'const'
-If you do this, you are promising that the member function will not modify any member variables.
-
-Mark every member function that is not modifying any member variables as 'const'
-*/
-#if false
-//a function where the argument is passed by const-ref
-void someMemberFunction(const Axe& axe);
+//a function where the argument is passed by const-ref.
+void Foo::someMemberFunction(const Axe& axe);
 
 //a member function that is marked const, meaning it will not modify any member variables of the 'Axe' class.
 void Axe::aConstMemberFunction() const { }
 #endif
 /*
- 8) After you finish, click the [run] button.  Clear up any errors or warnings as best you can.
+ 9) click the [run] button.  Clear up any errors or warnings as best you can.
  
- see here for an example: https://repl.it/@matkatmusic/ch3p04example
-
- Clear any warnings about exit-time-destructors.
- Suppress them by adding -Wno-exit-time-destructors to the .replit file with the other warning suppression flags
+ Remember, your Chapter 3 Part 4 task worked when it was all in one file. so you shouldn't need to edit any of it.  
+         just split it up into source files and provide the appropriate #include directives.
+         tip: you cannot forward-declare nested types!  
+         The file that a nested type is defined in MUST be included wherever that nested type is written.
  */
+
+
+
 
 
 #include "LeakedObjectDetector.h"
