@@ -180,8 +180,7 @@ Oscillator::SingleCycleWaveform::~SingleCycleWaveform()
 }
 
 //     1) compute interpolated sample, phase in [0..2 pi)
-float Oscillator::SingleCycleWaveform
-    ::computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent) const
+float Oscillator::SingleCycleWaveform::computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent) const
 {
     if (! silent)
     {
@@ -229,9 +228,8 @@ float Oscillator::SingleCycleWaveform
 
 
 //     2) transform shape in various ways
-void Oscillator::SingleCycleWaveform
-    ::transformShape (bool doFlipPolarity, bool normalize, 
-                      bool removeDcOffset, float warp)
+void Oscillator::SingleCycleWaveform::transformShape (bool doFlipPolarity, bool normalize, 
+                                                      bool removeDcOffset, float warp)
 {
      // for the moment, we only set the flipPolarity and reversePhase flags
     flipPolarity = doFlipPolarity;
@@ -506,8 +504,7 @@ EnvelopeGate::EnvelopeParameters::~EnvelopeParameters()
 }
 
 // 1) transform value by applying shape power function (or inverse function depending on flag)
-float EnvelopeGate::EnvelopeParameters
-    ::applyShapePowerFunction (float value, bool computeInverseFunction) const
+float EnvelopeGate::EnvelopeParameters::applyShapePowerFunction (float value, bool computeInverseFunction) const
 {
     if (computeInverseFunction)
     {
@@ -523,10 +520,9 @@ float EnvelopeGate::EnvelopeParameters
 // CAUTION: must NOT be called when the EnvelopeGate is active 
 // (i.e. in a state different from ENVELOPESTATE_OFF)
 
-void EnvelopeGate::EnvelopeParameters
-    ::adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, 
-                        float sustainLevel, double releaseTimeInSeconds, 
-                        double midValuePoint, double sampleRateInHz)
+void EnvelopeGate::EnvelopeParameters::adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, 
+                                                         float sustainLevel, double releaseTimeInSeconds, 
+                                                         double midValuePoint, double sampleRateInHz)
 {
     attackTimeInSamples = static_cast<int>(attackTimeInSeconds * sampleRateInHz + 0.5);
     decayTimeInSamples = static_cast<int>(decayTimeInSeconds * sampleRateInHz + 0.5);
@@ -1326,7 +1322,8 @@ void SimpleMonoSynth::printLfo (const std::string& prefix) const
  Extracted from main Part1 since I want main to only print
  UDT members.
 */
-void dumpUDTBehaviour() {
+void dumpUDTBehaviour() 
+{
     {
         // block for testing UDT1: Oscillator and nested UDT SingleCycleWaveform
         
