@@ -2,6 +2,6 @@
 
 struct Proj5Constants
 {
-    static double piTwice;
-    static float piTwiceFloat;
+    static const double piTwice;
+    static const float piTwiceFloat;
 };
