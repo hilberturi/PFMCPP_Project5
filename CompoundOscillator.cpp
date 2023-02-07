@@ -21,7 +21,7 @@ CompoundOscillator::~CompoundOscillator()
 
 
 // 1) resets both oscillators at once and adjusts parameters
-void CompoundOscillator::reset (float frequency, float initialPhaseOscA)
+void CompoundOscillator::reset (const float frequency, const float initialPhaseOscA)
 {
     float detuneFactor = (detuneInCent > 0 ? powf (2, detuneInCent / 1200) : 1);    
     
@@ -45,7 +45,7 @@ float CompoundOscillator::generateSample()
 
 
 // 3) dump given number of generated samples on console
-void CompoundOscillator::dumpSamples(int numSamples, bool restoreCurrentPhase)
+void CompoundOscillator::dumpSamples(const int numSamples, const bool restoreCurrentPhase)
 {
     float currentPhaseOscABeforeDumpSamples = oscA.currentPhase;
     float currentPhaseOscBBeforeDumpSamples = oscB.currentPhase;

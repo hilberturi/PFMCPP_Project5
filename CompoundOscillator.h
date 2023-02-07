@@ -27,11 +27,11 @@ struct CompoundOscillator
 
     // Things it can do:
     // 1) resets both oscillators at once and adjusts parameters
-    void reset (float frequency, float initialPhaseOscA = 0);
+    void reset (const float frequency, const float initialPhaseOscA = 0);
     // 2) generate sample by mixing samples of both embedded oscillators
     float generateSample();
     // 3) dump given number of generated samples on console
-    void dumpSamples (int numSamples, bool restoreCurrentPhase = false);
+    void dumpSamples (const int numSamples, const bool restoreCurrentPhase = false);
 
     // print functions for members, Part 2
     void printBalance (const std::string& prefix = "this->") const;

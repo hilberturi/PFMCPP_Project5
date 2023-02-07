@@ -20,7 +20,7 @@ struct EnvelopeGate
     // UDT2: Nested UDT: Envelope Parameters
     struct EnvelopeParameters
     {
-        EnvelopeParameters(float sustainLevel = 1);
+        EnvelopeParameters(const float sustainLevel = 1);
         ~EnvelopeParameters();
 
         // 5 properties:
@@ -37,14 +37,14 @@ struct EnvelopeGate
         float exponentOfShapePowerFunction {1}; 
         // 3 things it can do:
         //     1) transform value by applying shape power function (or inverse)
-        float applyShapePowerFunction (float value, bool computeInverseFunction = false) const;
+        float applyShapePowerFunction (const float value, const bool computeInverseFunction = false) const;
 
         //     2) adjust parameters. midValuePoint is the normalized value in (0,1) 
         //         where the shape transform should reach 0.5
         //        CAUTION: must NOT be called when the EnvelopeGate is active 
         //        (i.e. in a state different from ENVELOPESTATE_OFF)
-        void adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, float sustainLevel, 
-                               double releaseTimeInSeconds, double midValuePoint = 0.5, double sampleRateInHz = 44100);
+        void adjustParameters (const double attackTimeInSeconds, const double decayTimeInSeconds, const float sustainLevel, 
+                               double const releaseTimeInSeconds, double midValuePoint = 0.5, const double sampleRateInHz = 44100);
 
         //     3) something that requires a loop => dump shape
         void dumpShape (int numberOfSteps = 11) const;
@@ -59,7 +59,7 @@ struct EnvelopeGate
     };
 
     // enclosing UDT2: EnvelopeGate
-    EnvelopeGate(float sustainLevel = 1);
+    EnvelopeGate(const float sustainLevel = 1);
     ~EnvelopeGate();
 
     // 5 properties:
@@ -78,13 +78,13 @@ struct EnvelopeGate
     // 3 things it can do:
     //     1) trigger envelope (bool keyPressed, bool allowRetriggger)
     //        returns true if an active envelope has been retriggered by a new key press
-    bool triggerEnvelope (bool keyPressed, bool allowRetrigger = true); 
+    bool triggerEnvelope (const bool keyPressed, const bool allowRetrigger = true); 
 
     //     2) get next sample for envelope gate
     float computeNextEnvelopeGateSample();
 
     //     3) dump envelope gate response, assuming that the key is being pressed for numSamplesKeyPressed
-    void dumpEnvelopeGateResponse (int numSamplesKeyPressed, int displayEveryNthStep = 1, int maxStepsAllowed = 1000000);
+    void dumpEnvelopeGateResponse (const int numSamplesKeyPressed, int displayEveryNthStep = 1, const int maxStepsAllowed = 1000000);
 
     // print functions for members, Part 2
     void printEnvelopeState (const std::string& prefix = "this->") const;

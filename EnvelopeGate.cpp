@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////
 // Implementation of nested UDT: EnvelopeParameters:
 
-EnvelopeGate::EnvelopeParameters::EnvelopeParameters(float sustainLevel)
+EnvelopeGate::EnvelopeParameters::EnvelopeParameters(const float sustainLevel)
     : normalizedSustainLevel (applyShapePowerFunction (sustainLevel, true))
 {
     std::cout << "constructor EnvelopeParameters" << std::endl;
@@ -17,7 +17,7 @@ EnvelopeGate::EnvelopeParameters::~EnvelopeParameters()
 }
 
 // 1) transform value by applying shape power function (or inverse function depending on flag)
-float EnvelopeGate::EnvelopeParameters::applyShapePowerFunction (float value, bool computeInverseFunction) const
+float EnvelopeGate::EnvelopeParameters::applyShapePowerFunction (const float value, const bool computeInverseFunction) const
 {
     if (computeInverseFunction)
     {
@@ -33,9 +33,9 @@ float EnvelopeGate::EnvelopeParameters::applyShapePowerFunction (float value, bo
 // CAUTION: must NOT be called when the EnvelopeGate is active 
 // (i.e. in a state different from ENVELOPESTATE_OFF)
 
-void EnvelopeGate::EnvelopeParameters::adjustParameters (double attackTimeInSeconds, double decayTimeInSeconds, 
-                                                         float sustainLevel, double releaseTimeInSeconds, 
-                                                         double midValuePoint, double sampleRateInHz)
+void EnvelopeGate::EnvelopeParameters::adjustParameters (const double attackTimeInSeconds, const double decayTimeInSeconds, 
+                                                         const float sustainLevel, const double releaseTimeInSeconds, 
+                                                         double midValuePoint, const double sampleRateInHz)
 {
     attackTimeInSamples = static_cast<int>(attackTimeInSeconds * sampleRateInHz + 0.5);
     decayTimeInSamples = static_cast<int>(decayTimeInSeconds * sampleRateInHz + 0.5);
@@ -118,7 +118,7 @@ void EnvelopeGate::EnvelopeParameters::printEnvelopeParameters (const std::strin
 ///////////////////////////////////////////////////////
 // Implementation of main UDT2: EnvelopeGate:
 
-EnvelopeGate::EnvelopeGate (float sustainLevel)
+EnvelopeGate::EnvelopeGate (const float sustainLevel)
     : envelopeParameters (sustainLevel)
 {
     std::cout << "constructor EnvelopeGate" << std::endl;    
@@ -131,7 +131,7 @@ EnvelopeGate::~EnvelopeGate()
 
 // 1) trigger envelope (bool keyPressed, bool allowRetriggger)
 // returns true if an active envelope has been retriggered by a new key press
-bool EnvelopeGate::triggerEnvelope (bool keyPressed, bool allowRetrigger)
+bool EnvelopeGate::triggerEnvelope (const bool keyPressed, const bool allowRetrigger)
 {
     if (! keyPressed)
     {
@@ -286,9 +286,9 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
 
 
 // 3) dump envelope gate response, assuming that the key is being pressed for numSamplesKeyPressed
-void EnvelopeGate::dumpEnvelopeGateResponse (int numSamplesKeyPressed,
+void EnvelopeGate::dumpEnvelopeGateResponse (const int numSamplesKeyPressed,
                                              int displayEveryNthStep, 
-                                             int maxStepsAllowed)
+                                             const int maxStepsAllowed)
 {
     if (displayEveryNthStep <= 0)
     {
