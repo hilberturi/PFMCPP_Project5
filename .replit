@@ -1,5 +1,5 @@
 language = "cpp"
-run = "clang++ -std=c++17 -Wno-deprecated -Wno-padded -Weverything -Wno-c++98-compat -Wno-missing-prototypes -Wno-exit-time-destructors main.cpp && ./a.out"
+run = "clang++ -std=c++17 -Wno-deprecated -Wno-padded -Weverything -Wno-c++98-compat -Wno-missing-prototypes -Wno-exit-time-destructors main.cpp Proj5Constants.cpp Oscillator.cpp EnvelopeGate.cpp LowFrequencyOscillator.cpp CompoundOscillator.cpp SimpleMonoSynth.cpp Wrappers.cpp && ./a.out"
 hidden = ["ccls"]
 
 [nix]

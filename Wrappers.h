@@ -4,7 +4,13 @@
 
 // Wrapper classes added for Part 3
 
+// forward declarations
 struct Oscillator;
+struct EnvelopeGate;
+struct LowFrequencyOscillator;
+struct CompoundOscillator;
+struct SimpleMonoSynth;
+
 
 struct OscillatorWrapper
 {
@@ -14,8 +20,6 @@ struct OscillatorWrapper
     Oscillator* oscPtr;
 };
 
-struct EnvelopeGate;
-
 struct EnvelopeGateWrapper
 {
     EnvelopeGateWrapper (EnvelopeGate* pointerToGetOwned);
@@ -23,8 +27,6 @@ struct EnvelopeGateWrapper
 
     EnvelopeGate* egPtr;
 };
-
-struct LowFrequencyOscillator;
 
 struct LowFrequencyOscillatorWrapper
 {
@@ -34,8 +36,6 @@ struct LowFrequencyOscillatorWrapper
     LowFrequencyOscillator* lfoPtr;
 };
 
-struct CompoundOscillator;
-
 struct CompoundOscillatorWrapper
 {
     CompoundOscillatorWrapper (CompoundOscillator* pointerToGetOwned);
@@ -43,12 +43,10 @@ struct CompoundOscillatorWrapper
     CompoundOscillator* coscPtr;
 };
 
-struct SimpleMonoSynth;
-
 struct SimpleMonoSynthWrapper
 {
     SimpleMonoSynthWrapper (SimpleMonoSynth* pointerToGetOwned);
     ~SimpleMonoSynthWrapper();
 
-    SimpleMonoSynth* synthPtr; // == nullptr; in video, but there's no implicit ctor and explicit one inits the pointer
+    SimpleMonoSynth* synthPtr;
 };

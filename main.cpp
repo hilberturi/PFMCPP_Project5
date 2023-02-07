@@ -63,24 +63,18 @@ void Axe::aConstMemberFunction() const { }
 
 #include "LeakedObjectDetector.h"
 
+#include "Wrappers.h"
+
 #include "Proj5Constants.h"
 #include "Oscillator.h"
 #include "EnvelopeGate.h"
 #include "LowFrequencyOscillator.h"
 #include "CompoundOscillator.h"
 #include "SimpleMonoSynth.h"
-#include "Wrappers.h"
 
 #include <iostream>
 #include <string>
 #include <cmath>
-
-
-
-
-
-
-
 
 
 /*

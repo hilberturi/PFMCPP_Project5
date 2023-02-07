@@ -1,6 +1,11 @@
 #pragma once
 
 #include "LeakedObjectDetector.h"
+
+#include "Oscillator.h"
+#include "EnvelopeGate.h"
+#include "LowFrequencyOscillator.h"
+
 #include <string>
 
 /*

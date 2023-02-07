@@ -1,6 +1,7 @@
 #include "CompoundOscillator.h"
 
 #include "Proj5Constants.h"
+
 #include <iostream>
 #include <cmath>
 
