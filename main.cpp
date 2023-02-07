@@ -66,15 +66,11 @@ void Axe::aConstMemberFunction() const { }
 #include "Wrappers.h"
 
 #include "Proj5Constants.h"
-#include "Oscillator.h"
-#include "EnvelopeGate.h"
-#include "LowFrequencyOscillator.h"
 #include "CompoundOscillator.h"
 #include "SimpleMonoSynth.h"
 
 #include <iostream>
 #include <string>
-#include <cmath>
 
 
 /*
