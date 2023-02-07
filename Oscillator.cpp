@@ -4,7 +4,7 @@
 #include <cmath>
 
 // Implementation of nested UDT Oscillator::SingleCycleWaveform:
-Oscillator::SingleCycleWaveform::SingleCycleWaveform (int numberOfSupportPoints)
+Oscillator::SingleCycleWaveform::SingleCycleWaveform (const int numberOfSupportPoints)
     : numSupportPoints(numberOfSupportPoints), phaseIncrement(Proj5Constants::piTwice / numSupportPoints)
 {
     std::cout << "constructor SingleCycleWaveform" << std::endl; 
@@ -19,7 +19,7 @@ Oscillator::SingleCycleWaveform::~SingleCycleWaveform()
 }
 
 //     1) compute interpolated sample, phase in [0..2 pi)
-float Oscillator::SingleCycleWaveform::computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent) const
+float Oscillator::SingleCycleWaveform::computeInterpolatedSample (const float phase, const float oscAngularVelocity, const bool silent) const
 {
     if (! silent)
     {
@@ -67,8 +67,8 @@ float Oscillator::SingleCycleWaveform::computeInterpolatedSample (float phase, f
 
 
 //     2) transform shape in various ways
-void Oscillator::SingleCycleWaveform::transformShape (bool doFlipPolarity, bool normalize, 
-                                                      bool removeDcOffset, float warp)
+void Oscillator::SingleCycleWaveform::transformShape (const bool doFlipPolarity, const bool normalize, 
+                                                      const bool removeDcOffset, const float warp)
 {
      // for the moment, we only set the flipPolarity and reversePhase flags
     flipPolarity = doFlipPolarity;
@@ -80,7 +80,7 @@ void Oscillator::SingleCycleWaveform::transformShape (bool doFlipPolarity, bool 
 //     3) dump waveform by generating samples at equidistant steps 
 // (as given by numSupportPoints) and showing them on the console.
 void Oscillator::SingleCycleWaveform
-    ::dumpWaveform (float scaling) const
+    ::dumpWaveform (const float scaling) const
 {
     
     for (int i = 0; i < numSupportPoints; ++i)
@@ -95,7 +95,7 @@ void Oscillator::SingleCycleWaveform
     }
 }
 
-float Oscillator::SingleCycleWaveform::getSampleAtIndex (int sampleIndex) const
+float Oscillator::SingleCycleWaveform::getSampleAtIndex (const int sampleIndex) const
 {
     // This would normally look up the i-th precomputed value
     // in an array, but we do not know yet about arrays and
@@ -141,7 +141,7 @@ void Oscillator::SingleCycleWaveform::printWaveform (const std::string& prefix) 
 
 // Implementation of struct Oscillator
 
-Oscillator::Oscillator (std::string id, float rate)
+Oscillator::Oscillator (const std::string& id, const float rate)
     : oscillatorId(id), sampleRate(rate)
 {
     std::cout << "constructor Oscillator" << std::endl;
@@ -153,7 +153,7 @@ Oscillator::~Oscillator()
 }
 
 //     1) reset to given frequency and initial phase
-void Oscillator::reset (float frequency, float initialPhase)
+void Oscillator::reset (const float frequency, const float initialPhase)
 {
     angularVelocity = static_cast<float>(Proj5Constants::piTwice) * frequency / sampleRate;
     currentPhase = initialPhase;
@@ -176,7 +176,7 @@ float Oscillator::generateSample()
 }
 
  //     3) dump a given number of samples to console Samples (optionally without changing internal state)
-void Oscillator::dumpSamples (int numSamples, bool restoreCurrentPhase)
+void Oscillator::dumpSamples (const int numSamples, const bool restoreCurrentPhase)
 {
     float currentPhaseBeforeDumpSamples = currentPhase;
     

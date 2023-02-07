@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////
 // Implementation of UDT3: LowFrequencyOscillator
 
-LowFrequencyOscillator::LowFrequencyOscillator (double sampleRate)
+LowFrequencyOscillator::LowFrequencyOscillator (const double sampleRate)
     : sampleRateInHz(sampleRate), phaseIncrementPerStep(Proj5Constants::piTwice / sampleRate)
 {
     std::cout << "constructor LowFrequencyOscillator" << std::endl;        
@@ -20,7 +20,7 @@ LowFrequencyOscillator::~LowFrequencyOscillator()
 
 // 3 things it can do:
 // 1) reset. This retriggers the LFO and adjust several parameters
-void LowFrequencyOscillator::reset (double speedInHz, double initialPhase, 
+void LowFrequencyOscillator::reset (const double speedInHz, const double initialPhase, 
                                     double riseTimeInSeconds)
 {
     phaseIncrementPerStep = speedInHz * Proj5Constants::piTwice / sampleRateInHz;
@@ -59,8 +59,8 @@ float LowFrequencyOscillator::generateSample()
 }
 
 // 3) dump LFO output to console
-void LowFrequencyOscillator::dumpToConsole (int totalNumSamples, 
-                                            int displayEveryNthStep)
+void LowFrequencyOscillator::dumpToConsole (const int totalNumSamples, 
+                                            const int displayEveryNthStep)
 {
     for (int i = 0; i < totalNumSamples; ++i)
     {

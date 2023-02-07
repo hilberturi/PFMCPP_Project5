@@ -7,7 +7,7 @@ struct Oscillator
 {
     struct SingleCycleWaveform 
     {    
-        SingleCycleWaveform (int numSupportPoints);
+        SingleCycleWaveform (const int numSupportPoints);
         ~SingleCycleWaveform();
 
         // 5 properties:
@@ -24,18 +24,18 @@ struct Oscillator
 
         // 3 things it can do:
         //     1) compute interpolated sample given phase and angular velocity
-        float computeInterpolatedSample (float phase, float oscAngularVelocity, bool silent = true) const;
+        float computeInterpolatedSample (const float phase, const float oscAngularVelocity, const bool silent = true) const;
 
         //     2) transform shape in various ways
-        void transformShape (bool flipPolarity = false, bool normalize = false, 
-                             bool removeDcOffset = false, float warp = 0);
+        void transformShape (bool const flipPolarity = false, const bool normalize = false, 
+                             bool const removeDcOffset = false, const float warp = 0);
 
         //     3) dump waveform by generating samples at equidistant steps (as
         //        given by numSupportPoints) and showing them on the console.
-        void dumpWaveform (float scaling = 1) const;
+        void dumpWaveform (const float scaling = 1) const;
 
         // I need an internal helper function, 0 <= sampleIndex < numSupportPoints
-        float getSampleAtIndex (int sampleIndex) const;
+        float getSampleAtIndex (const int sampleIndex) const;
 
         // print functions for members, Part 2
         void printName (const std::string& prefix = "this->") const;
@@ -46,7 +46,7 @@ struct Oscillator
         void printWaveform (const std::string& prefix = "this->") const;
     };
 
-    Oscillator (std::string oscillatorId, float sampleRate = 44100);
+    Oscillator (const std::string& oscillatorId, float sampleRate = 44100);
     ~Oscillator();
 
     // 5 properties:

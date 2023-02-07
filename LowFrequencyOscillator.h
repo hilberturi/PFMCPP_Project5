@@ -9,7 +9,7 @@
  */
 struct LowFrequencyOscillator
 {
-    LowFrequencyOscillator (double sampleRateInHz = 44100);
+    LowFrequencyOscillator (const double sampleRateInHz = 44100);
     ~LowFrequencyOscillator();
     
     // 5 properties:
@@ -26,13 +26,13 @@ struct LowFrequencyOscillator
 
     // 3 things it can do:
     //    1) reset. This retriggers the LFO and adjust several parameters
-    void reset (double speedInHz = 1, double initialPhase = 0, double riseTimeInSeconds = 0);
+    void reset (const double speedInHz = 1, const double initialPhase = 0, double riseTimeInSeconds = 0);
 
     //    2) generate single sample. This is a bipolar LFO with samples in [-1, 1].
     float generateSample();
 
     //    3) dump LFO output to console
-    void dumpToConsole (int totalNumSamples, int displayEveryNthStep = 1);
+    void dumpToConsole (const int totalNumSamples, const int displayEveryNthStep = 1);
 
     // print functions for members, Part 2
     void printSampleRateInHz (const std::string& prefix = "this->") const;
