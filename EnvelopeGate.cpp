@@ -55,8 +55,7 @@ void EnvelopeGate::EnvelopeParameters::adjustParameters (const double attackTime
 }
 
 // 3) something that requires a loop => dump shape
-void EnvelopeGate::EnvelopeParameters
-    ::dumpShape (int numberOfSteps) const
+void EnvelopeGate::EnvelopeParameters::dumpShape (int numberOfSteps) const
 {
     if (numberOfSteps <= 2)
     {
@@ -183,10 +182,8 @@ bool EnvelopeGate::triggerEnvelope (const bool keyPressed, const bool allowRetri
 
     if (attackTimeInSamples > 0)
     {
-        double normalizedDelta = 
-            static_cast<double>(1 - lastComputedNormalizedSample);
-        normalizedDeltaPerStep = 
-            static_cast<float> (normalizedDelta / attackTimeInSamples);
+        double normalizedDelta = static_cast<double>(1 - lastComputedNormalizedSample);
+        normalizedDeltaPerStep = static_cast<float> (normalizedDelta / attackTimeInSamples);
     }
     else
     {
@@ -221,11 +218,9 @@ float EnvelopeGate::computeNextEnvelopeGateSample()
             
             if (decayTimeInSamples > 0)
             {
-                double normalizedDelta = 
-                    static_cast<double>(envelopeParameters.normalizedSustainLevel
+                double normalizedDelta = static_cast<double>(envelopeParameters.normalizedSustainLevel
                                         - lastComputedNormalizedSample);
-                normalizedDeltaPerStep = 
-                    static_cast<float> (normalizedDelta / decayTimeInSamples);
+                normalizedDeltaPerStep = static_cast<float> (normalizedDelta / decayTimeInSamples);
             }
             else
             {

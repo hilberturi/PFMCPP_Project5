@@ -34,8 +34,7 @@ void SimpleMonoSynth::triggerNote (const bool keyPressed, const int midiNoteNumb
 
     // avoid clicks for frequency change by keeping phase for currently playing note if we retrigger 
     // with a new note:
-    float initialPhase = 
-        (envelopeGate.envelopeState == EnvelopeGate::ENVELOPESTATE_OFF ? 0 :  oscillator.currentPhase);
+    float initialPhase = (envelopeGate.envelopeState == EnvelopeGate::ENVELOPESTATE_OFF ? 0 :  oscillator.currentPhase);
     
     oscillator.reset (frequency, initialPhase);
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 // Wrapper classes added for Part 3
 
 // forward declarations
