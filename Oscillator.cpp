@@ -1,14 +1,11 @@
 #include "Oscillator.h"
+#include "Proj5Constants.h"
 #include <iostream>
 #include <cmath>
 
-static double piTwice = 2 * 3.1415926535897932384626433832795;
-static float piTwiceFloat = static_cast<float>(2 * 3.1415926535897932384626433832795);
-
-
 // Implementation of nested UDT Oscillator::SingleCycleWaveform:
 Oscillator::SingleCycleWaveform::SingleCycleWaveform (int numberOfSupportPoints)
-    : numSupportPoints(numberOfSupportPoints), phaseIncrement(piTwice / numSupportPoints)
+    : numSupportPoints(numberOfSupportPoints), phaseIncrement(Proj5Constants::piTwice / numSupportPoints)
 {
     std::cout << "constructor SingleCycleWaveform" << std::endl; 
     
@@ -158,7 +155,7 @@ Oscillator::~Oscillator()
 //     1) reset to given frequency and initial phase
 void Oscillator::reset (float frequency, float initialPhase)
 {
-    angularVelocity = static_cast<float>(piTwice) * frequency / sampleRate;
+    angularVelocity = static_cast<float>(Proj5Constants::piTwice) * frequency / sampleRate;
     currentPhase = initialPhase;
 }
 
@@ -170,9 +167,9 @@ float Oscillator::generateSample()
     // prepare for next sample
     currentPhase += angularVelocity;
     
-    if (currentPhase >= piTwiceFloat)
+    if (currentPhase >= Proj5Constants::piTwiceFloat)
     {
-        currentPhase -= piTwiceFloat;
+        currentPhase -= Proj5Constants::piTwiceFloat;
     }
     
     return sample;
