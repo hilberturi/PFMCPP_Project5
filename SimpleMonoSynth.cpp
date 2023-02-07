@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////
 // Implementation of UDT5: SimpleMonoSynth
 
-SimpleMonoSynth::SimpleMonoSynth (double sampleRateInHz)
+SimpleMonoSynth::SimpleMonoSynth (const double sampleRateInHz)
     : oscillator ("osc", static_cast<float>(sampleRateInHz)), lfo (sampleRateInHz)
 {
    std::cout << "constructor SimpleMonoSynth" << std::endl;                
@@ -18,8 +18,8 @@ SimpleMonoSynth::~SimpleMonoSynth()
 }
 
 // 1) trigger a note given midi pitch, velocity in 0..1. Trigger again with keyPressed = false for release of key.
-void SimpleMonoSynth::triggerNote (bool keyPressed, int midiNoteNumber, float velocity,  
-                                   double tuningInHz)
+void SimpleMonoSynth::triggerNote (const bool keyPressed, const int midiNoteNumber, const float velocity,  
+                                   const double tuningInHz)
 {
     if (! keyPressed)
     {
@@ -64,7 +64,7 @@ float SimpleMonoSynth::generateSample()
 }
 
 // 3) dump given number of samples on console. Shown step numbers can be shifted by offset.
-void SimpleMonoSynth::dumpSamples (int numSteps, int firstStepOffset)
+void SimpleMonoSynth::dumpSamples (const int numSteps, const int firstStepOffset)
 {
     int stepLimit = numSteps + firstStepOffset;
     

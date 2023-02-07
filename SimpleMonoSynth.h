@@ -14,7 +14,7 @@
  */
 struct SimpleMonoSynth
 {
-    SimpleMonoSynth(double sampleRateInHz = 44100);
+    SimpleMonoSynth(const double sampleRateInHz = 44100);
     ~SimpleMonoSynth();
 
     // 5 properties:
@@ -30,11 +30,11 @@ struct SimpleMonoSynth
     float amplitudeOfPlayingNote {1};
     // Things it can do:
     //   1) trigger a note given midi pitch, velocity in 0..1. Trigger again with keyPressed = false for release of key.
-    void triggerNote (bool keyPressed = true, int midiNoteNumber = 69, float velocity = 1, double tuningInHz = 440);
+    void triggerNote (const bool keyPressed = true, const int midiNoteNumber = 69, const float velocity = 1, const double tuningInHz = 440);
     //   2) generate sample
     float generateSample();
     //   3) dump given number of samples on console. Shown step numbers can be shifted by offset.
-    void dumpSamples (int numSteps, int firstStepOffset = 0);
+    void dumpSamples (const int numSteps, const int firstStepOffset = 0);
 
     // print functions for members, Part 2
     void printAmountOfLfoLevelModulation (const std::string& prefix = "this->") const;
